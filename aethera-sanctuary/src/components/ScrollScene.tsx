@@ -1,53 +1,70 @@
 import { useEffect, useRef } from 'react';
 
 const clamp = (value: number) => Math.max(0, Math.min(1, value));
-const range = (value: number, start: number, end: number) =>
-  clamp((value - start) / (end - start));
+
+const smoothstep = (value: number) => {
+  const progress = clamp(value);
+  return progress * progress * (3 - 2 * progress);
+};
 
 export function ScrollScene() {
-  const sceneRef = useRef<HTMLDivElement>(null);
-  const closedRef = useRef<HTMLImageElement>(null);
-  const openingRef = useRef<HTMLImageElement>(null);
-  const openRef = useRef<HTMLImageElement>(null);
+  const rigRef = useRef<HTMLDivElement>(null);
+  const leftWingRef = useRef<HTMLDivElement>(null);
+  const rightWingRef = useRef<HTMLDivElement>(null);
+  const bodyRef = useRef<HTMLImageElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
+  const dustRef = useRef<HTMLDivElement>(null);
+  const targetRef = useRef(0);
   const progressRef = useRef(0);
-  const easedProgressRef = useRef(0);
   const rafRef = useRef<number>();
 
   useEffect(() => {
     const updateTarget = () => {
-      const start = window.innerHeight * 0.35;
+      const start = window.innerHeight * 0.28;
       const end = document.documentElement.scrollHeight - window.innerHeight;
-      progressRef.current = clamp(
+      targetRef.current = clamp(
         (window.scrollY - start) / Math.max(1, end - start),
       );
     };
 
     const tick = () => {
-      easedProgressRef.current +=
-        (progressRef.current - easedProgressRef.current) * 0.08;
-      const progress = easedProgressRef.current;
+      progressRef.current += (targetRef.current - progressRef.current) * 0.075;
+      const progress = smoothstep(progressRef.current);
 
       if (
-        sceneRef.current &&
-        closedRef.current &&
-        openingRef.current &&
-        openRef.current &&
-        glowRef.current
+        rigRef.current &&
+        leftWingRef.current &&
+        rightWingRef.current &&
+        bodyRef.current &&
+        glowRef.current &&
+        dustRef.current
       ) {
-        const openingMix = range(progress, 0.06, 0.38);
-        const openMix = range(progress, 0.34, 0.72);
+        const fold = 72 * (1 - progress);
+        const flutter = Math.sin(progress * Math.PI * 3) * (1 - progress) * 1.6;
+        const wingBrightness = 0.72 + progress * 0.48;
+        const wingSaturation = 0.82 + progress * 0.3;
 
-        closedRef.current.style.opacity = String(1 - openingMix);
-        openingRef.current.style.opacity = String(
-          openingMix * (1 - openMix),
-        );
-        openRef.current.style.opacity = String(openMix);
-        glowRef.current.style.opacity = String(range(progress, 0.2, 0.78));
+        leftWingRef.current.style.transform =
+          `perspective(1200px) rotateY(${fold + flutter}deg)`;
+        rightWingRef.current.style.transform =
+          `perspective(1200px) rotateY(${-fold - flutter}deg)`;
 
-        const scale = 1.015 + progress * 0.045;
-        const lift = progress * -14;
-        sceneRef.current.style.transform = `translate3d(0, ${lift}px, 0) scale(${scale})`;
+        const filter =
+          `brightness(${wingBrightness}) saturate(${wingSaturation}) ` +
+          `drop-shadow(0 0 ${12 + progress * 24}px rgba(187,137,229,${0.14 + progress * 0.28}))`;
+        leftWingRef.current.style.filter = filter;
+        rightWingRef.current.style.filter = filter;
+
+        const scale = 0.94 + progress * 0.1;
+        const lift = -8 - progress * 18;
+        const drift = Math.sin(progress * Math.PI) * 4;
+        rigRef.current.style.transform =
+          `translate3d(${drift}px, ${lift}px, 0) scale(${scale})`;
+
+        bodyRef.current.style.filter =
+          `brightness(${0.82 + progress * 0.35}) drop-shadow(0 0 ${8 + progress * 18}px rgba(215,184,244,${0.18 + progress * 0.28}))`;
+        glowRef.current.style.opacity = String(progress * 0.92);
+        dustRef.current.style.opacity = String(clamp((progress - 0.24) / 0.48));
       }
 
       rafRef.current = requestAnimationFrame(tick);
@@ -67,26 +84,25 @@ export function ScrollScene() {
 
   return (
     <div className="fixed-scene" aria-hidden="true">
-      <div ref={sceneRef} className="butterfly-sequence">
+      <div ref={rigRef} className="butterfly-rig">
+        <div ref={leftWingRef} className="butterfly-wing butterfly-wing-left">
+          <img src="/images/glass-butterfly-open.png" alt="" />
+        </div>
+        <div ref={rightWingRef} className="butterfly-wing butterfly-wing-right">
+          <img src="/images/glass-butterfly-open.png" alt="" />
+        </div>
         <img
-          ref={closedRef}
-          src="/images/glass-butterfly-closed.png"
-          alt=""
-          className="butterfly-frame"
-        />
-        <img
-          ref={openingRef}
-          src="/images/glass-butterfly-opening.png"
-          alt=""
-          className="butterfly-frame opacity-0"
-        />
-        <img
-          ref={openRef}
+          ref={bodyRef}
           src="/images/glass-butterfly-open.png"
           alt=""
-          className="butterfly-frame opacity-0"
+          className="butterfly-body"
         />
         <div ref={glowRef} className="butterfly-glow" />
+        <div ref={dustRef} className="butterfly-dust">
+          {Array.from({ length: 18 }, (_, index) => (
+            <i key={index} style={{ '--dust-index': index } as React.CSSProperties} />
+          ))}
+        </div>
       </div>
       <div className="scene-violet-wash" />
       <div className="scene-vignette" />

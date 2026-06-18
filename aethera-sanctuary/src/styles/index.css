@@ -41,25 +41,70 @@ a {
   background: #09060d;
 }
 
-.butterfly-sequence,
-.butterfly-frame {
+.butterfly-rig {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-}
-
-.butterfly-sequence {
-  transform: scale(1.015);
+  transform: translateY(-8px) scale(0.94);
   transform-origin: center center;
+  transform-style: preserve-3d;
   will-change: transform;
 }
 
-.butterfly-frame {
+.butterfly-wing {
+  position: absolute;
+  top: 0;
+  width: 50%;
+  height: 100%;
+  overflow: hidden;
+  mix-blend-mode: screen;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  will-change: transform, filter;
+}
+
+.butterfly-wing img {
+  position: absolute;
+  top: 0;
+  width: 200%;
+  max-width: none;
+  height: 100%;
   object-fit: cover;
   object-position: center;
-  transition: opacity 120ms linear;
-  will-change: opacity;
+  user-select: none;
+}
+
+.butterfly-wing-left {
+  left: 0;
+  transform: perspective(1200px) rotateY(72deg);
+  transform-origin: right center;
+}
+
+.butterfly-wing-left img {
+  left: 0;
+}
+
+.butterfly-wing-right {
+  right: 0;
+  transform: perspective(1200px) rotateY(-72deg);
+  transform-origin: left center;
+}
+
+.butterfly-wing-right img {
+  right: 0;
+}
+
+.butterfly-body {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  clip-path: polygon(46.8% 0, 53.2% 0, 53.2% 100%, 46.8% 100%);
+  mix-blend-mode: screen;
+  will-change: filter;
 }
 
 .butterfly-glow {
@@ -80,6 +125,51 @@ a {
   transform: translateX(-50%);
   mix-blend-mode: screen;
   will-change: opacity;
+}
+
+.butterfly-dust {
+  position: absolute;
+  inset: 4% 7% 20%;
+  opacity: 0;
+  pointer-events: none;
+  will-change: opacity;
+}
+
+.butterfly-dust i {
+  --angle: calc(var(--dust-index) * 20deg);
+  position: absolute;
+  top: calc(16% + (var(--dust-index) % 5) * 13%);
+  left: calc(8% + (var(--dust-index) % 9) * 10%);
+  width: calc(2px + (var(--dust-index) % 3) * 1px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: rgba(225, 203, 246, 0.82);
+  box-shadow: 0 0 10px rgba(190, 143, 231, 0.7);
+  animation: butterfly-dust-drift
+    calc(4.8s + (var(--dust-index) % 5) * 0.55s)
+    ease-in-out
+    calc(var(--dust-index) * -0.31s)
+    infinite;
+}
+
+@keyframes butterfly-dust-drift {
+  0%,
+  100% {
+    opacity: 0.12;
+    transform: translate3d(0, 14px, 0) scale(0.7);
+  }
+  45% {
+    opacity: 0.9;
+  }
+  70% {
+    opacity: 0.35;
+    transform: translate3d(
+        calc(cos(var(--angle)) * 24px),
+        calc(sin(var(--angle)) * -36px),
+        0
+      )
+      scale(1.15);
+  }
 }
 
 .scene-violet-wash,
@@ -336,6 +426,11 @@ a {
 }
 
 @media (max-width: 767px) {
+  .butterfly-wing img,
+  .butterfly-body {
+    object-position: center top;
+  }
+
   .scroll-hero-content {
     padding-bottom: 4rem;
   }
