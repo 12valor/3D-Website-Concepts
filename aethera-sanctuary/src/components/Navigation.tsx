@@ -1,39 +1,88 @@
-const links = ['Studio', 'Journal'];
+import { useEffect, useRef, useState } from 'react';
+
+const links = [
+  { label: 'Story', href: '#story' },
+  { label: 'Studio', href: '#studio' },
+  { label: 'Journal', href: '#journal' },
+];
 
 export function Navigation() {
-  return (
-    <header className="fixed inset-x-0 top-0 z-50 flex items-center justify-between px-6 py-5 sm:px-10">
-      <div className="flex items-center gap-8">
-        <a
-          href="/"
-          aria-label="Aethera home"
-          className="font-display text-3xl tracking-tight text-white"
-        >
-          Aethera
-          <sup className="ml-0.5 align-super font-body text-[0.34em] font-medium">
-            ®
-          </sup>
-        </a>
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
 
-        <nav aria-label="Primary navigation" className="hidden items-center gap-6 md:flex">
-          {links.map((link) => (
-            <a
-              key={link}
-              href={`#${link.toLowerCase()}`}
-              className="font-body text-sm text-[#c8bfce] transition-colors hover:text-white"
-            >
-              {link}
+  useEffect(() => {
+    const onScroll = () => {
+      setScrolled(window.scrollY > 60);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  // Close menu on anchor click
+  const handleLinkClick = () => setMenuOpen(false);
+
+  // Lock body scroll when menu is open
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [menuOpen]);
+
+  return (
+    <>
+      <header
+        ref={headerRef}
+        className={`nav-header ${scrolled ? 'nav-scrolled' : ''} ${menuOpen ? 'nav-menu-open' : ''}`}
+      >
+        <div className="nav-inner">
+          <a
+            href="#hero"
+            aria-label="Aethera home"
+            className="nav-logo"
+            onClick={handleLinkClick}
+          >
+            Aethera
+            <sup>®</sup>
+          </a>
+
+          <nav aria-label="Primary navigation" className="nav-links">
+            {links.map(({ label, href }) => (
+              <a key={label} href={href} className="nav-link">
+                {label}
+              </a>
+            ))}
+          </nav>
+
+          <a href="#journey" className="nav-cta" onClick={handleLinkClick}>
+            Begin Journey
+          </a>
+
+          <button
+            type="button"
+            className="nav-burger"
+            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
+            <span />
+            <span />
+          </button>
+        </div>
+      </header>
+
+      {/* Mobile overlay menu */}
+      <div className={`mobile-menu ${menuOpen ? 'mobile-menu-open' : ''}`}>
+        <nav className="mobile-menu-nav">
+          {links.map(({ label, href }) => (
+            <a key={label} href={href} className="mobile-menu-link" onClick={handleLinkClick}>
+              {label}
             </a>
           ))}
+          <a href="#journey" className="mobile-menu-cta" onClick={handleLinkClick}>
+            Begin Journey
+          </a>
         </nav>
       </div>
-
-      <a
-        href="#journey"
-        className="rounded-lg border border-white/20 bg-black/20 px-5 py-2.5 font-body text-xs font-medium text-white backdrop-blur-md transition hover:border-[#b98ae8]/70 hover:bg-[#9b62d0]/30 sm:text-sm"
-      >
-        Begin Journey
-      </a>
-    </header>
+    </>
   );
 }

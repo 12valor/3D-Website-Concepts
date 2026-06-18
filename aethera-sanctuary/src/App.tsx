@@ -1,19 +1,21 @@
 import { Navigation } from './components/Navigation';
 import { ParticleField } from './components/ParticleField';
+import { HeroScene } from './components/HeroScene';
 import { ScrollScene } from './components/ScrollScene';
+import { StudioSection } from './components/StudioSection';
+import { JournalSection } from './components/JournalSection';
+import { FinaleSection } from './components/FinaleSection';
 
 function App() {
   return (
     <main className="relative bg-black text-white">
       <ParticleField />
       <Navigation />
+      <HeroScene />
       <ScrollScene />
-
-      <section id="journey" className="story-resolution">
-        <p>Aethera Eternal</p>
-        <h2>What opens can never return unchanged.</h2>
-        <a href="#story">Experience it again</a>
-      </section>
+      <StudioSection />
+      <JournalSection />
+      <FinaleSection />
     </main>
   );
 }
