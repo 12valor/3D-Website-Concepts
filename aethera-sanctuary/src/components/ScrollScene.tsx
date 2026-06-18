@@ -46,6 +46,13 @@ export function ScrollScene() {
       const section = sectionRef.current;
       if (!section) return;
 
+      // Fix GSAP coordinate space for centered elements to prevent matrix translation issues
+      gsap.set([
+        cocoonRef.current, cocoonGlowRef.current, coreRef.current,
+        innerGlowRef.current, mistRef.current, bloomRef.current,
+        butterflyRef.current, butterflyGlowRef.current
+      ], { xPercent: -50, yPercent: -50, x: 0, y: 0 });
+
       // Master timeline pinned to scroll
       const tl = gsap.timeline({
         scrollTrigger: {
@@ -225,13 +232,13 @@ export function ScrollScene() {
       // Full butterfly revealed, atmosphere settles
       // ═══════════════════════════════════════════════
 
-      // Wings fully open
+      // Wings fully open to resting state (V-shape)
       tl.to(leftWingRef.current,
-        { scaleX: 1, rotateZ: 0, duration: 0.28, ease: 'power3.out' },
+        { scaleX: 0.75, rotateZ: -3, duration: 0.28, ease: 'power3.out' },
         0.62
       );
       tl.to(rightWingRef.current,
-        { scaleX: 1, rotateZ: 0, duration: 0.28, ease: 'power3.out' },
+        { scaleX: 0.75, rotateZ: 3, duration: 0.28, ease: 'power3.out' },
         0.62
       );
 
