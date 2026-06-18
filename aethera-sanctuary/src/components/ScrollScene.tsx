@@ -234,11 +234,11 @@ export function ScrollScene() {
 
       // Wings fully open to resting state (V-shape)
       tl.to(leftWingRef.current,
-        { scaleX: 0.75, rotateZ: -3, duration: 0.28, ease: 'power3.out' },
+        { scaleX: 0.92, rotateZ: -1.5, duration: 0.28, ease: 'power3.out' },
         0.62
       );
       tl.to(rightWingRef.current,
-        { scaleX: 0.75, rotateZ: 3, duration: 0.28, ease: 'power3.out' },
+        { scaleX: 0.92, rotateZ: 1.5, duration: 0.28, ease: 'power3.out' },
         0.62
       );
 
