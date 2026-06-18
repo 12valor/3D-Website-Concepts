@@ -1,5 +1,4 @@
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
+
 @import "@fontsource-variable/geist";
 @tailwind base;
 @tailwind components;
@@ -156,59 +155,7 @@ a {
   transform: translateY(-3.25px) rotate(-45deg);
 }
 
-/* Mobile Menu Overlay */
-.mobile-menu {
-  position: fixed;
-  inset: 0;
-  z-index: 99;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(2, 1, 4, 0.94);
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 340ms ease, visibility 340ms ease;
-}
-
-.mobile-menu-open {
-  opacity: 1;
-  visibility: visible;
-}
-
-.mobile-menu-nav {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2.2rem;
-}
-
-.mobile-menu-link {
-  font-family: 'Instrument Serif', Georgia, serif;
-  font-size: 2.4rem;
-  color: #e2dae6;
-  transition: color 200ms;
-}
-
-.mobile-menu-link:hover {
-  color: #c697ee;
-}
-
-.mobile-menu-cta {
-  margin-top: 1rem;
-  border: 1px solid rgba(185, 138, 232, 0.35);
-  border-radius: 999px;
-  padding: 0.85rem 2rem;
-  color: #e6dced;
-  font-size: 0.88rem;
-  transition: background 200ms, border-color 200ms;
-}
-
-.mobile-menu-cta:hover {
-  border-color: rgba(185, 138, 232, 0.6);
-  background: rgba(155, 98, 208, 0.18);
-}
+/* Removed old mobile menu styles as shadcn Sheet is now used */
 
 @media (min-width: 768px) {
   .nav-header {
@@ -748,6 +695,7 @@ a {
   left: 38%;
   transform: translate(-50%, -50%) scale(0.35);
   width: min(45vw, 600px);
+  aspect-ratio: 1.776;
   max-height: 70vh;
   z-index: 6;
   transform-origin: center;
@@ -1696,7 +1644,8 @@ a {
     --sidebar-ring: oklch(0.556 0 0);
   }
   * {
-    @apply border-border outline-ring/50;
+    border-color: var(--border);
+    outline-color: color-mix(in srgb, var(--ring) 50%, transparent);
   }
   body {
     @apply bg-background text-foreground;
