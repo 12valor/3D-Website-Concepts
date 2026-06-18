@@ -33,6 +33,373 @@ a {
   text-decoration: none;
 }
 
+.transformation-story {
+  position: relative;
+  height: 520vh;
+  background: #000;
+}
+
+.transformation-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 22% 48%, rgba(71, 35, 98, 0.18), transparent 30%),
+    radial-gradient(circle at 80% 42%, rgba(44, 24, 66, 0.14), transparent 34%),
+    #020103;
+}
+
+.story-stars {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 14% 18%, rgba(229, 212, 245, 0.8) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 75% 24%, rgba(195, 161, 225, 0.72) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 88% 66%, rgba(255, 255, 255, 0.58) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 35% 72%, rgba(190, 151, 225, 0.48) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 62% 84%, rgba(255, 255, 255, 0.42) 0 1px, transparent 1.5px);
+  background-size: 230px 230px, 310px 310px, 270px 270px, 370px 370px, 430px 430px;
+  opacity: 0.7;
+}
+
+.cocoon-rig {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform: translate3d(-25vw, 0, 0) scale(0.92);
+  transform-origin: center;
+  will-change: transform, opacity;
+}
+
+.cocoon-shell {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
+
+.cocoon-shell img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  mix-blend-mode: screen;
+  filter: drop-shadow(0 0 24px rgba(166, 105, 213, 0.22));
+}
+
+.cocoon-shell-left img {
+  clip-path: polygon(0 0, 50.3% 0, 50.3% 100%, 0 100%);
+}
+
+.cocoon-shell-right img {
+  clip-path: polygon(49.7% 0, 100% 0, 100% 100%, 49.7% 100%);
+}
+
+.cocoon-crack {
+  position: absolute;
+  top: 21%;
+  left: 45.7%;
+  width: 8.6%;
+  height: 58%;
+  overflow: visible;
+  filter: drop-shadow(0 0 8px rgba(236, 216, 255, 0.9));
+}
+
+.cocoon-crack path {
+  fill: none;
+  stroke: rgba(240, 223, 255, 0.92);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 680;
+  stroke-dashoffset: 680;
+  opacity: 0;
+  will-change: stroke-dashoffset, opacity;
+}
+
+.cocoon-core {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 22%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.96),
+    rgba(207, 165, 239, 0.54) 24%,
+    rgba(139, 76, 190, 0.13) 58%,
+    transparent 72%
+  );
+  filter: blur(10px);
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.45);
+  mix-blend-mode: screen;
+  will-change: transform, opacity;
+}
+
+.story-butterfly {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: translate3d(-25vw, 8vh, 0) scale(0.16);
+  transform-origin: center;
+  will-change: transform, opacity;
+}
+
+.story-wing {
+  position: absolute;
+  inset: 0;
+  will-change: transform, filter;
+}
+
+.story-wing img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  mix-blend-mode: screen;
+}
+
+.story-wing-left {
+  transform: scaleX(0.12) rotate(-3.2deg);
+  transform-origin: center;
+}
+
+.story-wing-left img {
+  clip-path: polygon(0 0, 50.3% 0, 50.3% 100%, 0 100%);
+}
+
+.story-wing-right {
+  transform: scaleX(0.12) rotate(3.2deg);
+  transform-origin: center;
+}
+
+.story-wing-right img {
+  clip-path: polygon(49.7% 0, 100% 0, 100% 100%, 49.7% 100%);
+}
+
+.story-butterfly-glow {
+  position: absolute;
+  top: 18%;
+  left: 50%;
+  width: 54%;
+  aspect-ratio: 1.6;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse,
+    rgba(229, 207, 248, 0.24),
+    rgba(144, 85, 194, 0.08) 50%,
+    transparent 72%
+  );
+  filter: blur(38px);
+  transform: translateX(-50%);
+  mix-blend-mode: screen;
+}
+
+.transformation-particles {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(42vw, 620px);
+  aspect-ratio: 1.2;
+  opacity: 0;
+  transform: translate3d(-23vw, 2vh, 0) scale(0.7);
+  will-change: transform, opacity;
+}
+
+.transformation-particles i {
+  position: absolute;
+  top: var(--particle-y);
+  left: var(--particle-x);
+  width: var(--particle-size);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: rgba(238, 219, 255, 0.92);
+  box-shadow: 0 0 11px rgba(190, 137, 232, 0.88);
+  animation: story-particle var(--particle-duration) ease-in-out
+    var(--particle-delay) infinite;
+}
+
+@keyframes story-particle {
+  0%,
+  100% {
+    opacity: 0.08;
+    transform: translate3d(0, 20px, 0) scale(0.6);
+  }
+  48% {
+    opacity: 0.9;
+  }
+  75% {
+    opacity: 0.2;
+    transform: translate3d(22px, -42px, 0) scale(1.25);
+  }
+}
+
+.story-copy {
+  position: absolute;
+  top: 22%;
+  right: 7vw;
+  z-index: 5;
+  width: min(42vw, 650px);
+  text-align: right;
+  will-change: transform;
+}
+
+.story-copy p {
+  margin: 0 0 1.2rem;
+  color: #aa90bc;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.story-copy h1 {
+  margin: 0;
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: clamp(3rem, 6vw, 6.8rem);
+  font-weight: 400;
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+}
+
+.story-copy h1 em {
+  color: #c7a0e7;
+}
+
+.story-copy > span {
+  display: inline-block;
+  max-width: 30rem;
+  margin-top: 1.5rem;
+  color: #aaa0ae;
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.story-timeline {
+  position: absolute;
+  right: 6vw;
+  bottom: 6.5vh;
+  left: 6vw;
+  z-index: 6;
+}
+
+.story-progress-track {
+  height: 1px;
+  background: rgba(220, 195, 238, 0.18);
+}
+
+.story-progress-line {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #8e54bd, #e8d6f7);
+  box-shadow: 0 0 12px rgba(181, 126, 223, 0.65);
+  transform: scaleX(0);
+  transform-origin: left;
+  will-change: transform;
+}
+
+.story-step-list {
+  display: grid;
+  margin-top: 1rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+}
+
+.story-step {
+  display: grid;
+  opacity: 0.28;
+  transition:
+    opacity 280ms ease,
+    transform 280ms ease;
+}
+
+.story-step b {
+  color: #b681dd;
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+}
+
+.story-step strong {
+  margin-top: 0.4rem;
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 1.2rem;
+  font-weight: 400;
+}
+
+.story-step small {
+  max-width: 14rem;
+  margin-top: 0.3rem;
+  color: #918995;
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.story-scroll-hint {
+  position: absolute;
+  top: 50%;
+  left: 2rem;
+  display: flex;
+  z-index: 6;
+  align-items: center;
+  gap: 0.6rem;
+  color: #766d7b;
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transform: rotate(-90deg) translateX(-50%);
+  transform-origin: left top;
+}
+
+.story-scroll-hint svg {
+  width: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+}
+
+.story-resolution {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6rem 1.5rem;
+  text-align: center;
+  background:
+    radial-gradient(circle at 50% 24%, rgba(96, 52, 130, 0.2), transparent 36%),
+    #020103;
+}
+
+.story-resolution p {
+  margin: 0 0 1rem;
+  color: #b48bce;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.story-resolution h2 {
+  max-width: 62rem;
+  margin: 0;
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: clamp(3.2rem, 8vw, 8rem);
+  font-weight: 400;
+  line-height: 0.95;
+}
+
+.story-resolution a {
+  margin-top: 2.5rem;
+  border: 1px solid rgba(216, 191, 238, 0.32);
+  border-radius: 999px;
+  padding: 0.9rem 1.6rem;
+  color: #e6dced;
+  font-size: 0.8rem;
+}
+
 .fixed-scene {
   position: fixed;
   inset: -20% 0 0;
@@ -399,6 +766,60 @@ a {
 }
 
 @media (max-width: 767px) {
+  .transformation-story {
+    height: 460vh;
+  }
+
+  .cocoon-rig {
+    top: 8%;
+    left: -10vw;
+    width: 120vw;
+    height: 85%;
+  }
+
+  .story-butterfly {
+    inset: 3% -46%;
+  }
+
+  .story-copy {
+    top: 17%;
+    right: 1.5rem;
+    left: 1.5rem;
+    width: auto;
+    text-align: center;
+  }
+
+  .story-copy h1 {
+    font-size: clamp(2.8rem, 14vw, 4.6rem);
+  }
+
+  .story-copy > span {
+    display: none;
+  }
+
+  .story-timeline {
+    right: 1.25rem;
+    bottom: 3.5vh;
+    left: 1.25rem;
+  }
+
+  .story-step-list {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.65rem;
+  }
+
+  .story-step strong {
+    font-size: 0.9rem;
+  }
+
+  .story-step small {
+    display: none;
+  }
+
+  .story-scroll-hint {
+    display: none;
+  }
+
   .butterfly-wing img {
     object-position: center top;
   }
