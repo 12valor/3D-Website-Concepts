@@ -1,4 +1,6 @@
 import { type CSSProperties, useEffect, useRef } from 'react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 const dustCount = 28;
 
@@ -107,7 +109,9 @@ export function HeroScene() {
       <div ref={heroRef} className="scroll-hero">
         <div className="hero-bottom-gradient" />
         <div className="scroll-hero-content">
-          <p className="hero-subtitle">A sanctuary for luminous minds</p>
+          <Badge variant="outline" className="hero-subtitle-badge mb-4 border-white/10 bg-black/40 text-purple-200/80 tracking-widest uppercase">
+            A sanctuary for luminous minds
+          </Badge>
           <h1>
             Where silence becomes{' '}
             <span className="violet-underline">
@@ -123,12 +127,14 @@ export function HeroScene() {
             <div className="quiet-code">
               <span>npx</span> create-aethera
             </div>
-            <a href="#story" className="primary-action">
-              Witness the Story
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="m5 12h14M13 5l7 7-7 7" />
-              </svg>
-            </a>
+            <Button asChild className="primary-action bg-purple-600 hover:bg-purple-500 text-white rounded-lg h-12 px-6">
+              <a href="#story">
+                Witness the Story
+                <svg viewBox="0 0 24 24" aria-hidden="true" className="ml-2 w-4 h-4">
+                  <path d="m5 12h14M13 5l7 7-7 7" />
+                </svg>
+              </a>
+            </Button>
           </div>
         </div>
         <div className="scroll-cue" aria-hidden="true">

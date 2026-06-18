@@ -1,192 +1,357 @@
-import { type CSSProperties, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { ThreeParticles } from './ThreeParticles';
+import { Badge } from '@/components/ui/badge';
 
-const clamp = (value: number) => Math.max(0, Math.min(1, value));
-const range = (value: number, start: number, end: number) =>
-  clamp((value - start) / (end - start));
-const ease = (value: number) => {
-  const progress = clamp(value);
-  return progress * progress * (3 - 2 * progress);
-};
+gsap.registerPlugin(ScrollTrigger);
 
 const storySteps = [
-  ['01', 'Dormant', 'A quiet form holds its light close.'],
-  ['02', 'Awakening', 'Pressure becomes radiance. The shell begins to yield.'],
-  ['03', 'Emergence', 'Light escapes first. Then the hidden form follows.'],
-  ['04', 'Becoming', 'What was protected learns the shape of open air.'],
+  { num: '01', title: 'Dormant', body: 'A quiet form holds its light close.' },
+  { num: '02', title: 'Awakening', body: 'Pressure becomes radiance. The shell begins to yield.' },
+  { num: '03', title: 'Emergence', body: 'Light escapes first. Then the hidden form follows.' },
+  { num: '04', title: 'Becoming', body: 'What was protected learns the shape of open air.' },
 ];
 
 export function ScrollScene() {
-  const sectionRef = useRef<HTMLElement>(null);
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+
+  // Cocoon elements
   const cocoonRef = useRef<HTMLDivElement>(null);
-  const cocoonLeftRef = useRef<HTMLDivElement>(null);
-  const cocoonRightRef = useRef<HTMLDivElement>(null);
-  const crackRef = useRef<SVGPathElement>(null);
+  const cocoonGlowRef = useRef<HTMLDivElement>(null);
+  const crackSvgRef = useRef<SVGPathElement>(null);
   const coreRef = useRef<HTMLDivElement>(null);
+
+  // Mist / bloom layers
+  const innerGlowRef = useRef<HTMLDivElement>(null);
+  const mistRef = useRef<HTMLDivElement>(null);
+  const bloomRef = useRef<HTMLDivElement>(null);
+
+  // Butterfly elements
   const butterflyRef = useRef<HTMLDivElement>(null);
   const leftWingRef = useRef<HTMLDivElement>(null);
   const rightWingRef = useRef<HTMLDivElement>(null);
-  const particlesRef = useRef<HTMLDivElement>(null);
+  const butterflyGlowRef = useRef<HTMLDivElement>(null);
+
+  // UI elements
   const copyRef = useRef<HTMLDivElement>(null);
   const progressLineRef = useRef<HTMLDivElement>(null);
   const stepRefs = useRef<Array<HTMLDivElement | null>>([]);
-  const targetRef = useRef(0);
-  const progressRef = useRef(0);
-  const rafRef = useRef<number>();
+
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   useEffect(() => {
-    const updateTarget = () => {
+    const ctx = gsap.context(() => {
       const section = sectionRef.current;
       if (!section) return;
-      const start = section.offsetTop;
-      const distance = section.offsetHeight - window.innerHeight;
-      targetRef.current = clamp((window.scrollY - start) / Math.max(1, distance));
-    };
 
-    const tick = () => {
-      progressRef.current += (targetRef.current - progressRef.current) * 0.09;
-      const progress = progressRef.current;
+      // Master timeline pinned to scroll
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: section,
+          start: 'top top',
+          end: '+=400%',
+          pin: true,
+          scrub: 1.5,
+          anticipatePin: 1,
+          onUpdate: (self) => {
+            setScrollProgress(self.progress);
 
-      if (
-        cocoonRef.current &&
-        cocoonLeftRef.current &&
-        cocoonRightRef.current &&
-        crackRef.current &&
-        coreRef.current &&
-        butterflyRef.current &&
-        leftWingRef.current &&
-        rightWingRef.current &&
-        particlesRef.current &&
-        copyRef.current &&
-        progressLineRef.current
-      ) {
-        const pressure = ease(range(progress, 0.03, 0.25));
-        const cracking = ease(range(progress, 0.1, 0.36));
-        const shellOpen = ease(range(progress, 0.27, 0.52));
-        const emerge = ease(range(progress, 0.36, 0.62));
-        const wingsOpen = ease(range(progress, 0.48, 0.82));
-        const travel = ease(range(progress, 0.58, 0.96));
+            // Update progress line
+            if (progressLineRef.current) {
+              progressLineRef.current.style.transform = `scaleX(${self.progress})`;
+            }
 
-        cocoonRef.current.style.transform =
-          `translate3d(${-25 + shellOpen * -5}vw, ${Math.sin(progress * Math.PI * 4) * (1 - shellOpen) * 4}px, 0) ` +
-          `scale(${0.92 + pressure * 0.055 - shellOpen * 0.08})`;
-        cocoonRef.current.style.opacity = String(1 - range(progress, 0.62, 0.82));
+            // Update step indicators
+            const activeStep = Math.min(3, Math.floor(self.progress * 4));
+            stepRefs.current.forEach((step, index) => {
+              if (!step) return;
+              step.style.opacity = index === activeStep ? '1' : '0.28';
+              step.style.transform = index === activeStep ? 'translateY(0)' : 'translateY(8px)';
+            });
+          },
+        },
+      });
 
-        cocoonLeftRef.current.style.transform =
-          `translate3d(${-shellOpen * 8.5}vw, 0, 0) rotate(${-shellOpen * 13}deg)`;
-        cocoonRightRef.current.style.transform =
-          `translate3d(${shellOpen * 8.5}vw, 0, 0) rotate(${shellOpen * 13}deg)`;
+      // ═══════════════════════════════════════════════
+      // PHASE 1: DORMANT (0% – 15%)
+      // Cocoon sits left-center with subtle breathing pulse
+      // ═══════════════════════════════════════════════
 
-        crackRef.current.style.strokeDashoffset = String(680 * (1 - cracking));
-        crackRef.current.style.opacity = String(cracking * (1 - shellOpen * 0.35));
+      // Cocoon gentle breathing pulse
+      tl.fromTo(cocoonRef.current,
+        { scale: 0.92 },
+        { scale: 0.96, duration: 0.08, ease: 'sine.inOut' },
+        0
+      );
 
-        coreRef.current.style.opacity = String(
-          clamp(cracking * 1.2 - range(progress, 0.68, 0.9)),
-        );
-        coreRef.current.style.transform =
-          `translate(-50%, -50%) scale(${0.45 + cracking * 1.3 + shellOpen * 0.7})`;
+      // Inner glow begins to kindle
+      tl.fromTo(cocoonGlowRef.current,
+        { opacity: 0.08, scale: 0.6 },
+        { opacity: 0.35, scale: 0.85, duration: 0.12, ease: 'power1.inOut' },
+        0.02
+      );
 
-        const butterflyX = -25 + emerge * 8 + travel * 37;
-        const butterflyScale = 0.16 + emerge * 0.52 + travel * 0.14;
-        butterflyRef.current.style.opacity = String(range(progress, 0.34, 0.5));
-        butterflyRef.current.style.transform =
-          `translate3d(${butterflyX}vw, ${8 - emerge * 9 - travel * 3}vh, 0) scale(${butterflyScale})`;
+      // ═══════════════════════════════════════════════
+      // PHASE 2: AWAKENING (10% – 35%)
+      // Inner glow intensifies, cracks appear, core brightens
+      // ═══════════════════════════════════════════════
 
-        const wingScale = 0.12 + wingsOpen * 0.88;
-        const wingCurl = (1 - wingsOpen) * 3.2;
-        leftWingRef.current.style.transform =
-          `scaleX(${wingScale}) rotate(${-wingCurl}deg)`;
-        rightWingRef.current.style.transform =
-          `scaleX(${wingScale}) rotate(${wingCurl}deg)`;
+      // Cocoon glow intensifies dramatically
+      tl.to(cocoonGlowRef.current,
+        { opacity: 0.85, scale: 1.2, duration: 0.18, ease: 'power2.inOut' },
+        0.10
+      );
 
-        const butterflyLight = 0.62 + cracking * 0.24 + wingsOpen * 0.5;
-        const butterflyFilter =
-          `brightness(${butterflyLight}) saturate(${0.75 + wingsOpen * 0.35}) ` +
-          `drop-shadow(0 0 ${8 + wingsOpen * 28}px rgba(198,151,238,${0.12 + wingsOpen * 0.35}))`;
-        leftWingRef.current.style.filter = butterflyFilter;
-        rightWingRef.current.style.filter = butterflyFilter;
+      // Light cracks draw along the seam
+      tl.fromTo(crackSvgRef.current,
+        { strokeDashoffset: 680, opacity: 0 },
+        { strokeDashoffset: 0, opacity: 1, duration: 0.22, ease: 'power1.inOut' },
+        0.10
+      );
 
-        particlesRef.current.style.opacity = String(
-          range(progress, 0.26, 0.5) * (1 - range(progress, 0.88, 1)),
-        );
-        particlesRef.current.style.transform =
-          `translate3d(${(-23 + travel * 34)}vw, ${2 - emerge * 7}vh, 0) scale(${0.7 + emerge * 0.6})`;
+      // Core light kindles
+      tl.fromTo(coreRef.current,
+        { opacity: 0, scale: 0.3 },
+        { opacity: 0.9, scale: 1.8, duration: 0.20, ease: 'power2.out' },
+        0.14
+      );
 
-        copyRef.current.style.transform =
-          `translate3d(${travel * -45}vw, 0, 0)`;
-        progressLineRef.current.style.transform = `scaleX(${progress})`;
+      // Cocoon begins pulsing stronger
+      tl.to(cocoonRef.current,
+        { scale: 1.0, duration: 0.15, ease: 'power2.inOut' },
+        0.12
+      );
 
-        const activeStep = Math.min(3, Math.floor(progress * 4));
-        stepRefs.current.forEach((step, index) => {
-          if (!step) return;
-          step.style.opacity = index === activeStep ? '1' : '0.28';
-          step.style.transform =
-            index === activeStep ? 'translateY(0)' : 'translateY(8px)';
-        });
-      }
+      // ═══════════════════════════════════════════════
+      // PHASE 3: VEILING (25% – 55%)
+      // Mist blooms outward, cocoon dissolves into light
+      // ═══════════════════════════════════════════════
 
-      rafRef.current = requestAnimationFrame(tick);
-    };
+      // Inner glow expands into full bloom
+      tl.to(innerGlowRef.current,
+        { opacity: 1, scale: 2.5, duration: 0.25, ease: 'power2.out' },
+        0.22
+      );
 
-    updateTarget();
-    window.addEventListener('scroll', updateTarget, { passive: true });
-    window.addEventListener('resize', updateTarget);
-    rafRef.current = requestAnimationFrame(tick);
+      // Volumetric mist swells outward
+      tl.fromTo(mistRef.current,
+        { opacity: 0, scale: 0.5 },
+        { opacity: 0.85, scale: 1.6, duration: 0.28, ease: 'power1.out' },
+        0.24
+      );
 
-    return () => {
-      window.removeEventListener('scroll', updateTarget);
-      window.removeEventListener('resize', updateTarget);
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
+      // Full bloom layer expands
+      tl.fromTo(bloomRef.current,
+        { opacity: 0, scale: 0.3 },
+        { opacity: 0.7, scale: 2.0, duration: 0.25, ease: 'power2.out' },
+        0.28
+      );
+
+      // Cocoon dissolves — blur + fade, NOT mechanical open
+      tl.to(cocoonRef.current,
+        {
+          opacity: 0,
+          filter: 'blur(24px) brightness(2)',
+          scale: 1.08,
+          duration: 0.22,
+          ease: 'power2.inOut',
+        },
+        0.28
+      );
+
+      // Crack lines fade as cocoon dissolves
+      tl.to(crackSvgRef.current,
+        { opacity: 0, duration: 0.12, ease: 'power1.in' },
+        0.32
+      );
+
+      // Core overexposure then fades
+      tl.to(coreRef.current,
+        { opacity: 0, scale: 3.5, duration: 0.20, ease: 'power2.in' },
+        0.30
+      );
+
+      // ═══════════════════════════════════════════════
+      // PHASE 4: EMERGENCE (40% – 75%)
+      // Butterfly materializes from within the light
+      // ═══════════════════════════════════════════════
+
+      // Butterfly fades in through the mist
+      tl.fromTo(butterflyRef.current,
+        {
+          opacity: 0,
+          scale: 0.35,
+          filter: 'blur(16px) brightness(1.8)',
+        },
+        {
+          opacity: 1,
+          scale: 0.75,
+          filter: 'blur(0px) brightness(1)',
+          duration: 0.28,
+          ease: 'power2.out',
+        },
+        0.38
+      );
+
+      // Wings begin to unfurl — start folded, end partially open
+      tl.fromTo(leftWingRef.current,
+        { scaleX: 0.1, rotateZ: -8 },
+        { scaleX: 0.55, rotateZ: -2, duration: 0.25, ease: 'power2.out' },
+        0.42
+      );
+      tl.fromTo(rightWingRef.current,
+        { scaleX: 0.1, rotateZ: 8 },
+        { scaleX: 0.55, rotateZ: 2, duration: 0.25, ease: 'power2.out' },
+        0.42
+      );
+
+      // Butterfly glow appears
+      tl.fromTo(butterflyGlowRef.current,
+        { opacity: 0, scale: 0.5 },
+        { opacity: 0.6, scale: 1.0, duration: 0.22, ease: 'power1.out' },
+        0.45
+      );
+
+      // Mist begins to clear
+      tl.to(mistRef.current,
+        { opacity: 0.25, scale: 1.8, duration: 0.22, ease: 'power1.inOut' },
+        0.50
+      );
+
+      // ═══════════════════════════════════════════════
+      // PHASE 5: REVELATION (65% – 100%)
+      // Full butterfly revealed, atmosphere settles
+      // ═══════════════════════════════════════════════
+
+      // Wings fully open
+      tl.to(leftWingRef.current,
+        { scaleX: 1, rotateZ: 0, duration: 0.28, ease: 'power3.out' },
+        0.62
+      );
+      tl.to(rightWingRef.current,
+        { scaleX: 1, rotateZ: 0, duration: 0.28, ease: 'power3.out' },
+        0.62
+      );
+
+      // Butterfly scales to final size + moves right
+      tl.to(butterflyRef.current,
+        {
+          scale: 1,
+          x: '15vw',
+          duration: 0.32,
+          ease: 'power2.out',
+        },
+        0.62
+      );
+
+      // Wing glow + luminance
+      tl.to(leftWingRef.current,
+        {
+          filter: 'brightness(0.95) saturate(1.1) drop-shadow(0 0 30px rgba(198,151,238,0.45))',
+          duration: 0.25,
+        },
+        0.68
+      );
+      tl.to(rightWingRef.current,
+        {
+          filter: 'brightness(0.95) saturate(1.1) drop-shadow(0 0 30px rgba(198,151,238,0.45))',
+          duration: 0.25,
+        },
+        0.68
+      );
+
+      // Mist fully clears
+      tl.to(mistRef.current,
+        { opacity: 0, duration: 0.20, ease: 'power1.in' },
+        0.68
+      );
+
+      // Bloom settles to subtle ambient
+      tl.to(bloomRef.current,
+        { opacity: 0.12, scale: 2.5, duration: 0.25, ease: 'power1.out' },
+        0.72
+      );
+
+      // Inner glow settles
+      tl.to(innerGlowRef.current,
+        { opacity: 0.15, scale: 3.0, duration: 0.20, ease: 'power1.out' },
+        0.72
+      );
+
+      // Butterfly glow stabilizes
+      tl.to(butterflyGlowRef.current,
+        { opacity: 0.45, scale: 1.2, duration: 0.18, ease: 'power1.out' },
+        0.78
+      );
+
+      // Text parallax — shifts left subtly as butterfly reveals right
+      tl.to(copyRef.current,
+        { x: '-8vw', duration: 0.80, ease: 'none' },
+        0.15
+      );
+
+      // Cocoon glow fades completely  
+      tl.to(cocoonGlowRef.current,
+        { opacity: 0, duration: 0.15, ease: 'power1.in' },
+        0.45
+      );
+    });
+
+    return () => ctx.revert();
   }, []);
 
   return (
-    <section ref={sectionRef} className="transformation-story" id="story">
-      <div className="transformation-stage">
+    <section ref={sectionRef} className="scroll-story-section" id="story">
+      <div ref={stageRef} className="scroll-story-stage">
+        {/* Starfield background */}
         <div className="story-stars" />
 
-        <div ref={cocoonRef} className="cocoon-rig">
-          <div ref={cocoonLeftRef} className="cocoon-shell cocoon-shell-left">
-            <img src="/images/crystal-cocoon-cutout.png" alt="" />
-          </div>
-          <div ref={cocoonRightRef} className="cocoon-shell cocoon-shell-right">
-            <img src="/images/crystal-cocoon-cutout.png" alt="" />
-          </div>
-          <svg className="cocoon-crack" viewBox="0 0 180 560">
+        {/* Three.js atmospheric particles */}
+        <ThreeParticles scrollProgress={scrollProgress} className="story-three-particles" />
+
+        {/* ─── Cocoon rig ─── */}
+        <div ref={cocoonRef} className="cocoon-container">
+          <img
+            src="/images/crystal-cocoon-cutout.png"
+            alt=""
+            className="cocoon-image"
+            draggable={false}
+          />
+
+          {/* Glow layer behind cocoon */}
+          <div ref={cocoonGlowRef} className="cocoon-inner-glow" />
+
+          {/* Crack lines */}
+          <svg className="cocoon-crack-svg" viewBox="0 0 180 560">
             <path
-              ref={crackRef}
+              ref={crackSvgRef}
               d="M94 40 77 102l24 46-30 62 28 42-39 77 35 45-24 74 18 72"
             />
           </svg>
-          <div ref={coreRef} className="cocoon-core" />
+
+          {/* Core light */}
+          <div ref={coreRef} className="cocoon-core-light" />
         </div>
 
-        <div ref={particlesRef} className="transformation-particles">
-          {Array.from({ length: 34 }, (_, index) => (
-            <i
-              key={index}
-              style={
-                {
-                  '--particle-x': `${8 + ((index * 37) % 84)}%`,
-                  '--particle-y': `${8 + ((index * 53) % 82)}%`,
-                  '--particle-size': `${1 + (index % 4)}px`,
-                  '--particle-delay': `${index * -0.17}s`,
-                  '--particle-duration': `${3.8 + (index % 6) * 0.55}s`,
-                } as CSSProperties
-              }
-            />
-          ))}
-        </div>
+        {/* ─── Atmosphere layers ─── */}
+        <div ref={innerGlowRef} className="atmo-inner-glow" />
+        <div ref={mistRef} className="atmo-mist" />
+        <div ref={bloomRef} className="atmo-bloom" />
 
-        <div ref={butterflyRef} className="story-butterfly">
-          <div ref={leftWingRef} className="story-wing story-wing-left">
-            <img src="/images/glass-butterfly-cutout.png" alt="" />
+        {/* ─── Butterfly rig ─── */}
+        <div ref={butterflyRef} className="butterfly-container">
+          <div ref={leftWingRef} className="butterfly-wing-l">
+            <img src="/images/glass-butterfly-cutout.png" alt="" draggable={false} />
           </div>
-          <div ref={rightWingRef} className="story-wing story-wing-right">
-            <img src="/images/glass-butterfly-cutout.png" alt="" />
+          <div ref={rightWingRef} className="butterfly-wing-r">
+            <img src="/images/glass-butterfly-cutout.png" alt="" draggable={false} />
           </div>
-          <div className="story-butterfly-glow" />
+          <div ref={butterflyGlowRef} className="butterfly-aura" />
         </div>
 
+        {/* ─── Story copy ─── */}
         <div ref={copyRef} className="story-copy">
           <p>Transformation in four movements</p>
           <h1>
@@ -194,25 +359,24 @@ export function ScrollScene() {
             <br />
             Others are <em>become.</em>
           </h1>
-          <span>
+          <span className="story-copy-hint">
             Scroll slowly. The scene moves with you—and reverses when you do.
           </span>
         </div>
 
+        {/* ─── Timeline UI ─── */}
         <div className="story-timeline">
           <div className="story-progress-track">
             <div ref={progressLineRef} className="story-progress-line" />
           </div>
           <div className="story-step-list">
-            {storySteps.map(([number, title, body], index) => (
+            {storySteps.map(({ num, title, body }, index) => (
               <div
-                key={number}
-                ref={(node) => {
-                  stepRefs.current[index] = node;
-                }}
+                key={num}
+                ref={(node) => { stepRefs.current[index] = node; }}
                 className="story-step"
               >
-                <b>{number}</b>
+                <Badge variant="outline" className="story-step-badge">{num}</Badge>
                 <strong>{title}</strong>
                 <small>{body}</small>
               </div>
@@ -220,6 +384,7 @@ export function ScrollScene() {
           </div>
         </div>
 
+        {/* Scroll hint */}
         <div className="story-scroll-hint">
           <span>Scroll to transform</span>
           <svg viewBox="0 0 24 24" aria-hidden="true">
