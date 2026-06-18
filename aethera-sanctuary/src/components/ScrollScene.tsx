@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { type CSSProperties, useEffect, useRef } from 'react';
 
 const clamp = (value: number) => Math.max(0, Math.min(1, value));
 
@@ -11,7 +11,6 @@ export function ScrollScene() {
   const rigRef = useRef<HTMLDivElement>(null);
   const leftWingRef = useRef<HTMLDivElement>(null);
   const rightWingRef = useRef<HTMLDivElement>(null);
-  const bodyRef = useRef<HTMLImageElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
   const dustRef = useRef<HTMLDivElement>(null);
   const targetRef = useRef(0);
@@ -21,7 +20,10 @@ export function ScrollScene() {
   useEffect(() => {
     const updateTarget = () => {
       const start = window.innerHeight * 0.28;
-      const end = document.documentElement.scrollHeight - window.innerHeight;
+      const trigger = document.getElementById('story-trigger');
+      const end = trigger
+        ? trigger.offsetTop + trigger.offsetHeight * 0.55
+        : document.documentElement.scrollHeight - window.innerHeight;
       targetRef.current = clamp(
         (window.scrollY - start) / Math.max(1, end - start),
       );
@@ -35,19 +37,19 @@ export function ScrollScene() {
         rigRef.current &&
         leftWingRef.current &&
         rightWingRef.current &&
-        bodyRef.current &&
         glowRef.current &&
         dustRef.current
       ) {
-        const fold = 72 * (1 - progress);
-        const flutter = Math.sin(progress * Math.PI * 3) * (1 - progress) * 1.6;
+        const wingScale = 0.24 + progress * 0.76;
+        const curl = (1 - progress) * 2.4;
+        const flutter = Math.sin(progress * Math.PI * 3) * (1 - progress) * 0.7;
         const wingBrightness = 0.72 + progress * 0.48;
         const wingSaturation = 0.82 + progress * 0.3;
 
         leftWingRef.current.style.transform =
-          `perspective(1200px) rotateY(${fold + flutter}deg)`;
+          `scaleX(${wingScale}) rotateZ(${curl + flutter}deg)`;
         rightWingRef.current.style.transform =
-          `perspective(1200px) rotateY(${-fold - flutter}deg)`;
+          `scaleX(${wingScale}) rotateZ(${-curl - flutter}deg)`;
 
         const filter =
           `brightness(${wingBrightness}) saturate(${wingSaturation}) ` +
@@ -61,8 +63,6 @@ export function ScrollScene() {
         rigRef.current.style.transform =
           `translate3d(${drift}px, ${lift}px, 0) scale(${scale})`;
 
-        bodyRef.current.style.filter =
-          `brightness(${0.82 + progress * 0.35}) drop-shadow(0 0 ${8 + progress * 18}px rgba(215,184,244,${0.18 + progress * 0.28}))`;
         glowRef.current.style.opacity = String(progress * 0.92);
         dustRef.current.style.opacity = String(clamp((progress - 0.24) / 0.48));
       }
@@ -91,17 +91,28 @@ export function ScrollScene() {
         <div ref={rightWingRef} className="butterfly-wing butterfly-wing-right">
           <img src="/images/glass-butterfly-open.png" alt="" />
         </div>
-        <img
-          ref={bodyRef}
-          src="/images/glass-butterfly-open.png"
-          alt=""
-          className="butterfly-body"
-        />
         <div ref={glowRef} className="butterfly-glow" />
         <div ref={dustRef} className="butterfly-dust">
-          {Array.from({ length: 18 }, (_, index) => (
-            <i key={index} style={{ '--dust-index': index } as React.CSSProperties} />
-          ))}
+          {Array.from({ length: 18 }, (_, index) => {
+            const side = index % 2 === 0 ? -1 : 1;
+            const lane = index % 9;
+            return (
+              <i
+                key={index}
+                style={
+                  {
+                    '--dust-x': `${12 + lane * 9}%`,
+                    '--dust-y': `${16 + (index % 5) * 13}%`,
+                    '--dust-dx': `${side * (18 + (index % 4) * 8)}px`,
+                    '--dust-dy': `${-28 - (index % 5) * 9}px`,
+                    '--dust-size': `${2 + (index % 3)}px`,
+                    '--dust-duration': `${4.8 + (index % 5) * 0.55}s`,
+                    '--dust-delay': `${index * -0.31}s`,
+                  } as CSSProperties
+                }
+              />
+            );
+          })}
         </div>
       </div>
       <div className="scene-violet-wash" />
