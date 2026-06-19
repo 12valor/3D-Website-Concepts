@@ -69,6 +69,8 @@ code, pre { font-family: 'DM Mono', monospace; }
 
 .navbar-brand,
 .navbar-command,
+.navbar-icon-button,
+.github-stars,
 .navbar-links button {
   border: 0;
   color: rgba(255, 243, 223, 0.82);
@@ -110,10 +112,60 @@ code, pre { font-family: 'DM Mono', monospace; }
   outline: none;
 }
 
+.navbar-actions,
+.navbar-socials,
+.github-stars {
+  display: inline-flex;
+  align-items: center;
+}
+
+.navbar-actions {
+  justify-self: end;
+  gap: 0.42rem;
+}
+
+.navbar-socials { gap: 0.12rem; }
+
+.navbar-icon-button {
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border-radius: 50%;
+  transition: color 180ms ease, background-color 180ms ease;
+}
+
+.navbar-icon-button:hover,
+.navbar-icon-button:focus-visible {
+  color: #f6d3a5;
+  background: rgba(255, 235, 211, 0.08);
+  outline: none;
+}
+
+.github-stars {
+  gap: 0.42rem;
+  min-height: 2.25rem;
+  padding: 0 0.68rem;
+  border: 1px solid rgba(255, 235, 211, 0.13);
+  border-radius: 999px;
+  color: #efb778;
+  background: rgba(255, 235, 211, 0.045);
+  font-family: 'DM Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.03em;
+  transition: border-color 180ms ease, background-color 180ms ease;
+}
+
+.github-stars:hover,
+.github-stars:focus-visible {
+  border-color: rgba(239, 183, 120, 0.38);
+  background: rgba(239, 183, 120, 0.1);
+  outline: none;
+}
+
 .navbar-command {
   display: inline-flex;
   align-items: center;
-  justify-self: end;
   gap: 0.65rem;
   min-height: 2.45rem;
   padding: 0 0.9rem;
@@ -656,6 +708,11 @@ code, pre { font-family: 'DM Mono', monospace; }
     padding-left: 0.85rem;
   }
   .navbar-links { display: none; }
+  .navbar-socials { display: none; }
+  .github-stars {
+    min-height: 2.25rem;
+    padding-inline: 0.58rem;
+  }
   .navbar-command { min-height: 2.25rem; }
   .scene { padding: 5.5rem 1.5rem 2.5rem; }
   .scene--hero { align-items: flex-end; padding: 5.5rem 1.5rem 5.2rem; }

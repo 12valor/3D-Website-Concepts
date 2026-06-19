@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Activity, ArrowUpRight, Check, Clock3, Copy, Download, FolderClosed, Link2, MousePointer2, Package, Pause, Terminal } from 'lucide-react';
+import { Activity, ArrowUpRight, Check, Clock3, Copy, Download, FolderClosed, Github, Link2, MousePointer2, Package, Pause, Star, Terminal, Twitter } from 'lucide-react';
 import { CloudField } from './CloudField';
 import { useFramerSmoothScroll } from '../hooks/useFramerSmoothScroll';
 
@@ -201,10 +201,24 @@ export function ScrollScene() {
               <button type="button" onClick={() => scrollToChapter(2)}>Session</button>
               <button type="button" onClick={() => scrollToChapter(3)}>Variants</button>
             </div>
-            <button type="button" onClick={() => copyCommand('npx snoopy')} className="navbar-command" aria-label="Copy npx snoopy command">
-              <code>npx snoopy</code>
-              {copiedCommand === 'npx snoopy' ? <Check size={13} /> : <Copy size={13} />}
-            </button>
+            <div className="navbar-actions">
+              <div className="navbar-socials" aria-label="Social links">
+                <button type="button" className="navbar-icon-button" aria-label="GitHub">
+                  <Github size={14} strokeWidth={1.6} />
+                </button>
+                <button type="button" className="navbar-icon-button" aria-label="X / Twitter">
+                  <Twitter size={14} strokeWidth={1.6} />
+                </button>
+              </div>
+              <button type="button" className="github-stars" aria-label="12,800 GitHub stars">
+                <Star size={13} fill="currentColor" strokeWidth={1.4} />
+                <span>12.8k</span>
+              </button>
+              <button type="button" onClick={() => copyCommand('npx snoopy')} className="navbar-command" aria-label="Copy npx snoopy command">
+                <code>npx snoopy</code>
+                {copiedCommand === 'npx snoopy' ? <Check size={13} /> : <Copy size={13} />}
+              </button>
+            </div>
           </nav>
         </header>
 
