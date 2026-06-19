@@ -53,6 +53,7 @@ export function ScrollScene() {
   const rootRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const mediaRef = useRef<HTMLDivElement>(null);
   const foregroundRef = useRef<HTMLDivElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
@@ -61,6 +62,88 @@ export function ScrollScene() {
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
   const [videoFailed, setVideoFailed] = useState(false);
   const [copiedCommand, setCopiedCommand] = useState<string | null>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas || navigator.userAgent.includes('jsdom')) return;
+
+    const context = canvas.getContext('2d');
+    if (!context) return;
+
+    let frameRequest = 0;
+    let videoFrameRequest = 0;
+
+    const drawFrame = () => {
+      frameRequest = 0;
+      if (!video.videoWidth || !video.videoHeight) return;
+
+      const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+      const width = Math.max(1, Math.round(canvas.clientWidth * pixelRatio));
+      const height = Math.max(1, Math.round(canvas.clientHeight * pixelRatio));
+
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
+      }
+
+      const sourceRatio = video.videoWidth / video.videoHeight;
+      const targetRatio = width / height;
+      let sourceX = 0;
+      let sourceY = 0;
+      let sourceWidth = video.videoWidth;
+      let sourceHeight = video.videoHeight;
+
+      if (sourceRatio > targetRatio) {
+        sourceWidth = video.videoHeight * targetRatio;
+        sourceX = (video.videoWidth - sourceWidth) / 2;
+      } else {
+        sourceHeight = video.videoWidth / targetRatio;
+        sourceY = (video.videoHeight - sourceHeight) / 2;
+      }
+
+      context.drawImage(
+        video,
+        sourceX,
+        sourceY,
+        sourceWidth,
+        sourceHeight,
+        0,
+        0,
+        width,
+        height,
+      );
+    };
+
+    const queueFrame = () => {
+      if (frameRequest) cancelAnimationFrame(frameRequest);
+      frameRequest = requestAnimationFrame(drawFrame);
+    };
+
+    const watchDecodedFrames = () => {
+      if (!video.requestVideoFrameCallback) return;
+      videoFrameRequest = video.requestVideoFrameCallback(() => {
+        queueFrame();
+        watchDecodedFrames();
+      });
+    };
+
+    const resizeObserver = new ResizeObserver(queueFrame);
+    resizeObserver.observe(canvas);
+    video.addEventListener('loadeddata', queueFrame);
+    video.addEventListener('seeked', queueFrame);
+    watchDecodedFrames();
+
+    if (video.readyState >= 2) queueFrame();
+
+    return () => {
+      if (frameRequest) cancelAnimationFrame(frameRequest);
+      if (videoFrameRequest) video.cancelVideoFrameCallback(videoFrameRequest);
+      resizeObserver.disconnect();
+      video.removeEventListener('loadeddata', queueFrame);
+      video.removeEventListener('seeked', queueFrame);
+    };
+  }, []);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -169,10 +252,11 @@ export function ScrollScene() {
       <section ref={stageRef} className="scrub-stage">
         <div ref={mediaRef} className="cinematic-media" aria-hidden="true">
           <img src="/quiet-place.jpg" alt="" className="cinematic-video" />
+          <canvas ref={canvasRef} className="cinematic-video cinematic-frame" />
           {!videoFailed ? (
             <video
               ref={videoRef}
-              className="cinematic-video"
+              className="cinematic-video scrub-video-source"
               muted
               playsInline
               preload="auto"
