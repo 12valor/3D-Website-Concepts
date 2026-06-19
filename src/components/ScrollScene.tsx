@@ -74,6 +74,7 @@ export function ScrollScene() {
     let frameRequest = 0;
     let holdTimer = 0;
     let captureVersion = 0;
+    let revealFrameRequest = 0;
 
     const drawFrame = (showFrame = true) => {
       frameRequest = 0;
@@ -136,10 +137,27 @@ export function ScrollScene() {
       queueFrame();
     };
 
+    const revealNativeFrame = () => {
+      if (!canvas.classList.contains('is-held') || revealFrameRequest) return;
+
+      if (video.requestVideoFrameCallback) {
+        revealFrameRequest = video.requestVideoFrameCallback(() => {
+          revealFrameRequest = 0;
+          canvas.classList.remove('is-held');
+        });
+        return;
+      }
+
+      if (!video.seeking) canvas.classList.remove('is-held');
+      else {
+        video.addEventListener('seeked', () => canvas.classList.remove('is-held'), { once: true });
+      }
+    };
+
     const scheduleFrameHold = () => {
       captureVersion += 1;
       const version = captureVersion;
-      canvas.classList.remove('is-held');
+      revealNativeFrame();
       window.clearTimeout(holdTimer);
       holdTimer = window.setTimeout(() => captureHeldFrame(version), 90);
     };
@@ -158,6 +176,7 @@ export function ScrollScene() {
     return () => {
       scheduleFrameHoldRef.current = () => undefined;
       if (frameRequest) cancelAnimationFrame(frameRequest);
+      if (revealFrameRequest) video.cancelVideoFrameCallback?.(revealFrameRequest);
       window.clearTimeout(holdTimer);
       video.removeEventListener('loadeddata', refreshHeldFrame);
       window.removeEventListener('resize', refreshHeldFrame);
