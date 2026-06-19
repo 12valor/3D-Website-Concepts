@@ -2,7 +2,6 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Activity, ArrowUpRight, Check, Clock3, Copy, Download, FolderClosed, Github, Link2, MousePointer2, Package, Pause, Star, Terminal, Twitter } from 'lucide-react';
-import { CloudField } from './CloudField';
 import { useFramerSmoothScroll } from '../hooks/useFramerSmoothScroll';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -378,7 +377,6 @@ export function ScrollScene() {
           </section>
 
           <section data-scene="dashboard" className="scene scene--dashboard">
-            <CloudField />
             <div data-dashboard-panel className="platform-showcase">
               <div className="platform-upper">
                 <aside className="platform-intro">

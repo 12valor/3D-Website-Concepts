@@ -464,15 +464,6 @@ code, pre { font-family: 'DM Mono', monospace; }
   transform: translateY(34px);
   will-change: transform, opacity;
 }
-.cloud-field {
-  position: absolute;
-  inset: 9% 2% 3%;
-  z-index: 1;
-  overflow: hidden;
-  pointer-events: none;
-  opacity: 0.82;
-}
-.cloud-field canvas { width: 100% !important; height: 100% !important; }
 .platform-showcase {
   position: relative;
   z-index: 2;
@@ -755,7 +746,6 @@ code, pre { font-family: 'DM Mono', monospace; }
   .package-summary { display: none; }
   .dashboard-bottom > div { border-right: 0; }
   .command-history code:nth-of-type(3) { display: none; }
-  .cloud-field { display: none; }
   .platform-showcase { transform: translateY(34px) scale(0.96); transform-origin: center; }
   .platform-workflow { display: none; }
   .dashboard-shell--platform { display: block; }
