@@ -59,7 +59,7 @@ export function ScrollScene() {
   const progressRef = useRef<HTMLDivElement>(null);
   const counterRef = useRef<HTMLSpanElement>(null);
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
-  const scheduleFrameHoldRef = useRef<() => void>(() => undefined);
+  const activeChapterRef = useRef(-1);
   const [videoFailed, setVideoFailed] = useState(false);
   const [copiedCommand, setCopiedCommand] = useState<string | null>(null);
 
@@ -72,17 +72,16 @@ export function ScrollScene() {
     if (!context) return;
 
     let frameRequest = 0;
-    let holdTimer = 0;
-    let captureVersion = 0;
-    let revealFrameRequest = 0;
+    let videoFrameRequest = 0;
+    let lastFrameAt = 0;
 
-    const drawFrame = (showFrame = true) => {
+    const drawFrame = () => {
       frameRequest = 0;
       if (!video.videoWidth || !video.videoHeight) return;
 
       const displayWidth = Math.max(1, canvas.clientWidth);
       const displayHeight = Math.max(1, canvas.clientHeight);
-      const renderScale = Math.min(1, 1280 / displayWidth);
+      const renderScale = Math.min(1, 960 / displayWidth);
       const width = Math.max(1, Math.round(displayWidth * renderScale));
       const height = Math.max(1, Math.round(displayHeight * renderScale));
 
@@ -118,68 +117,38 @@ export function ScrollScene() {
         height,
       );
 
-      if (showFrame) canvas.classList.add('is-held');
+      canvas.classList.add('is-ready');
     };
 
-    const queueFrame = (showFrame = true) => {
+    const queueFrame = () => {
       if (frameRequest) cancelAnimationFrame(frameRequest);
-      frameRequest = requestAnimationFrame(() => drawFrame(showFrame));
+      frameRequest = requestAnimationFrame(drawFrame);
     };
 
-    const captureHeldFrame = (version: number) => {
-      if (version !== captureVersion) return;
-
-      if (video.seeking) {
-        video.addEventListener('seeked', () => captureHeldFrame(version), { once: true });
-        return;
-      }
-
-      queueFrame();
+    const watchDecodedFrames = () => {
+      if (!video.requestVideoFrameCallback) return;
+      videoFrameRequest = video.requestVideoFrameCallback((timestamp) => {
+        if (timestamp - lastFrameAt >= 1000 / 24) {
+          lastFrameAt = timestamp;
+          queueFrame();
+        }
+        watchDecodedFrames();
+      });
     };
 
-    const revealNativeFrame = () => {
-      if (!canvas.classList.contains('is-held') || revealFrameRequest) return;
+    video.addEventListener('loadeddata', queueFrame);
+    video.addEventListener('seeked', queueFrame);
+    window.addEventListener('resize', queueFrame, { passive: true });
+    watchDecodedFrames();
 
-      if (video.requestVideoFrameCallback) {
-        revealFrameRequest = video.requestVideoFrameCallback(() => {
-          revealFrameRequest = 0;
-          canvas.classList.remove('is-held');
-        });
-        return;
-      }
-
-      if (!video.seeking) canvas.classList.remove('is-held');
-      else {
-        video.addEventListener('seeked', () => canvas.classList.remove('is-held'), { once: true });
-      }
-    };
-
-    const scheduleFrameHold = () => {
-      captureVersion += 1;
-      const version = captureVersion;
-      revealNativeFrame();
-      window.clearTimeout(holdTimer);
-      holdTimer = window.setTimeout(() => captureHeldFrame(version), 90);
-    };
-
-    const refreshHeldFrame = () => {
-      captureVersion += 1;
-      captureHeldFrame(captureVersion);
-    };
-
-    scheduleFrameHoldRef.current = scheduleFrameHold;
-    video.addEventListener('loadeddata', refreshHeldFrame);
-    window.addEventListener('resize', refreshHeldFrame, { passive: true });
-
-    if (video.readyState >= 2) refreshHeldFrame();
+    if (video.readyState >= 2) queueFrame();
 
     return () => {
-      scheduleFrameHoldRef.current = () => undefined;
       if (frameRequest) cancelAnimationFrame(frameRequest);
-      if (revealFrameRequest) video.cancelVideoFrameCallback?.(revealFrameRequest);
-      window.clearTimeout(holdTimer);
-      video.removeEventListener('loadeddata', refreshHeldFrame);
-      window.removeEventListener('resize', refreshHeldFrame);
+      if (videoFrameRequest) video.cancelVideoFrameCallback?.(videoFrameRequest);
+      video.removeEventListener('loadeddata', queueFrame);
+      video.removeEventListener('seeked', queueFrame);
+      window.removeEventListener('resize', queueFrame);
     };
   }, []);
 
@@ -220,12 +189,20 @@ export function ScrollScene() {
             invalidateOnRefresh: true,
             onUpdate: (self) => {
               video.pause();
-              scheduleFrameHoldRef.current();
+              const active = Math.min(chapters.length - 1, Math.floor(self.progress * chapters.length));
+              if (active !== activeChapterRef.current) {
+                activeChapterRef.current = active;
+                root.querySelectorAll<HTMLButtonElement>('[data-nav-chapter]').forEach((button) => {
+                  const isActive = Number(button.dataset.navChapter) === active;
+                  button.classList.toggle('is-active', isActive);
+                  if (isActive) button.setAttribute('aria-current', 'true');
+                  else button.removeAttribute('aria-current');
+                });
+              }
               if (progressRef.current) {
                 progressRef.current.style.transform = `scaleY(${self.progress})`;
               }
               if (counterRef.current) {
-                const active = Math.min(chapters.length - 1, Math.floor(self.progress * chapters.length));
                 counterRef.current.textContent = `0${active + 1} / 05`;
               }
             },
@@ -320,9 +297,9 @@ export function ScrollScene() {
               <span>snoopy</span>
             </button>
             <div className="navbar-links">
-              <button type="button" onClick={() => scrollToChapter(1)}>Experience</button>
-              <button type="button" onClick={() => scrollToChapter(2)}>Session</button>
-              <button type="button" onClick={() => scrollToChapter(3)}>Variants</button>
+              <button type="button" data-nav-chapter="1" onClick={() => scrollToChapter(1)}>Experience</button>
+              <button type="button" data-nav-chapter="2" onClick={() => scrollToChapter(2)}>Session</button>
+              <button type="button" data-nav-chapter="3" onClick={() => scrollToChapter(3)}>Variants</button>
             </div>
             <div className="navbar-actions">
               <div className="navbar-socials" aria-label="Social links">
@@ -366,7 +343,6 @@ export function ScrollScene() {
                 </div>
               </div>
             </div>
-            <p className="scroll-hint">Scroll to move the film</p>
           </section>
 
           <section data-scene="sync" className="scene scene--split">
@@ -485,67 +461,6 @@ export function ScrollScene() {
                       </div>
                     </article>
                   ))}
-                </div>
-              </div>
-            </div>
-            <div className="scene-heading">
-              <p className="section-label">Package Dashboard</p>
-              <h2 aria-label="A small window into your quieter moment.">
-                snoopy <i>/</i> session
-              </h2>
-              <p className="section-summary">A real-time view of your cinematic session, package state, and frame-level progress.</p>
-            </div>
-            <div data-dashboard-panel className="dashboard-shell">
-              <div className="dashboard-topbar">
-                <div className="dashboard-identity">
-                  <span className="package-mark__icon">s</span>
-                  <span>snoopy</span>
-                  <i>/</i>
-                  <strong>session</strong>
-                </div>
-                <span className="live-indicator"><i />scroll sync active</span>
-              </div>
-              <div className="dashboard-overview">
-                <div className="environment-card">
-                  <div className="environment-card__art"><span /></div>
-                  <div>
-                    <small>Environment</small>
-                    <strong>Sunset Hill</strong>
-                    <p>A calm place to think in frames.</p>
-                  </div>
-                </div>
-                <div className="dashboard-stats">
-                  {dashboardStats.map(({ label, value, icon: Icon }) => (
-                    <div key={label} className="stat-card">
-                      <span><Icon size={13} strokeWidth={1.5} />{label}</span>
-                      <strong>{value}</strong>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="frame-timeline">
-                <div className="frame-timeline__header"><span>Frame timeline</span><code>paused on exact frame</code></div>
-                <div className="frame-strip">
-                  {Array.from({ length: 12 }, (_, index) => <span key={index} style={{ '--frame': index } as CSSProperties} />)}
-                  <i />
-                </div>
-                <div className="frame-times"><span>00:00</span><span>02:30</span><span>05:00</span><span>07:30</span><span>10:00</span></div>
-              </div>
-              <div className="dashboard-bottom">
-                <div className="command-history">
-                  <span>Command history</span>
-                  <code><i>›</i> npx snoopy <small>09:41:12</small></code>
-                  <code><i>›</i> npx snoopy --breathe <small>09:43:28</small></code>
-                  <code><i>›</i> npx snoopy --variant sunset <small>09:45:11</small></code>
-                </div>
-                <div className="package-summary">
-                  <Package size={24} strokeWidth={1.3} />
-                  <div><span>Package</span><strong>snoopy</strong><code>1.4.2 · MIT</code></div>
-                </div>
-                <div className="session-status">
-                  <span><i />Active</span>
-                  <p>Frame updates with your scroll and stops exactly when you stop.</p>
-                  <code><Pause size={12} fill="currentColor" />paused</code>
                 </div>
               </div>
             </div>
