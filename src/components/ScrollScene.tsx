@@ -52,7 +52,7 @@ export function ScrollScene() {
   const rootRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const bufferVideoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const mediaRef = useRef<HTMLDivElement>(null);
   const foregroundRef = useRef<HTMLDivElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
@@ -67,32 +67,52 @@ export function ScrollScene() {
     const root = rootRef.current;
     const stage = stageRef.current;
     const video = videoRef.current;
-    const bufferVideo = bufferVideoRef.current;
-    if (!root || !stage || !video || !bufferVideo) return;
+    const canvas = canvasRef.current;
+    if (!root || !stage || !video || !canvas) return;
+
+    const ctx = canvas.getContext('2d', { alpha: false });
+    if (!ctx) return;
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let context: gsap.Context | undefined;
     let initialized = false;
     let disposed = false;
 
+    // Keep canvas resolution matched to its display size
+    const syncCanvasSize = () => {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const w = Math.round(rect.width * dpr);
+      const h = Math.round(rect.height * dpr);
+      if (canvas.width !== w || canvas.height !== h) {
+        canvas.width = w;
+        canvas.height = h;
+      }
+    };
+
+    const resizeObserver = new ResizeObserver(syncCanvasSize);
+    resizeObserver.observe(canvas);
+    syncCanvasSize();
+
+    const paintFrame = () => {
+      if (disposed) return;
+      syncCanvasSize();
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    };
+
     const createScrubTimeline = () => {
       if (
         initialized ||
         video.readyState < 1 ||
-        bufferVideo.readyState < 1 ||
         !Number.isFinite(video.duration) ||
         video.duration <= 0
       ) return;
 
       initialized = true;
       video.pause();
-      bufferVideo.pause();
       video.currentTime = 0;
-      bufferVideo.currentTime = 0;
-      video.classList.add('is-active');
+      paintFrame();
 
-      let activeVideo = video;
-      let hiddenVideo = bufferVideo;
       let targetTime = 0;
       let seekingFrame = false;
       const scrubClock = { time: 0 };
@@ -105,11 +125,7 @@ export function ScrollScene() {
 
         const commitFrame = () => {
           if (disposed) return;
-
-          hiddenVideo.pause();
-          hiddenVideo.classList.add('is-active');
-          activeVideo.classList.remove('is-active');
-          [activeVideo, hiddenVideo] = [hiddenVideo, activeVideo];
+          paintFrame();
           seekingFrame = false;
 
           if (Math.abs(targetTime - requestedTime) > 1 / 48) {
@@ -117,13 +133,13 @@ export function ScrollScene() {
           }
         };
 
-        if (Math.abs(hiddenVideo.currentTime - requestedTime) <= 0.001 && !hiddenVideo.seeking) {
+        if (Math.abs(video.currentTime - requestedTime) <= 0.001 && !video.seeking) {
           commitFrame();
           return;
         }
 
-        hiddenVideo.addEventListener('seeked', commitFrame, { once: true });
-        hiddenVideo.currentTime = requestedTime;
+        video.addEventListener('seeked', commitFrame, { once: true });
+        video.currentTime = requestedTime;
       };
 
       const requestFrame = (time: number) => {
@@ -209,12 +225,11 @@ export function ScrollScene() {
 
     createScrubTimeline();
     video.addEventListener('loadedmetadata', createScrubTimeline);
-    bufferVideo.addEventListener('loadedmetadata', createScrubTimeline);
 
     return () => {
       disposed = true;
       video.removeEventListener('loadedmetadata', createScrubTimeline);
-      bufferVideo.removeEventListener('loadedmetadata', createScrubTimeline);
+      resizeObserver.disconnect();
       timelineRef.current = null;
       context?.revert();
     };
@@ -238,30 +253,19 @@ export function ScrollScene() {
       <section ref={stageRef} className="scrub-stage">
         <div ref={mediaRef} className="cinematic-media" aria-hidden="true">
           <img src="/quiet-place.jpg" alt="" className="cinematic-video" />
+          <canvas
+            ref={canvasRef}
+            className="cinematic-video scrub-canvas"
+          />
           {!videoFailed ? (
             <video
               ref={videoRef}
-              className="cinematic-video scrub-video-source is-active"
+              className="scrub-video-hidden"
               muted
               playsInline
               preload="auto"
-              poster="/quiet-place.jpg"
               onError={() => setVideoFailed(true)}
               data-testid="scroll-video"
-            >
-              <source src="/watermark-scroll-optimized.mp4" type="video/mp4" />
-            </video>
-          ) : null}
-          {!videoFailed ? (
-            <video
-              ref={bufferVideoRef}
-              className="cinematic-video scrub-video-source"
-              muted
-              playsInline
-              preload="auto"
-              poster="/quiet-place.jpg"
-              onError={() => setVideoFailed(true)}
-              aria-hidden="true"
             >
               <source src="/watermark-scroll-optimized.mp4" type="video/mp4" />
             </video>

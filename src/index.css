@@ -31,14 +31,18 @@ code, pre { font-family: 'DM Mono', monospace; }
   backface-visibility: hidden;
   transform: translateZ(0);
 }
-.scrub-video-source {
+.scrub-canvas {
   z-index: 1;
+  image-rendering: auto;
+}
+.scrub-video-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
   opacity: 0;
   pointer-events: none;
-  will-change: opacity;
-  transition: opacity 50ms linear;
+  overflow: hidden;
 }
-.scrub-video-source.is-active { opacity: 1; }
 .cinematic-shade {
   position: absolute;
   inset: 0;
