@@ -89,30 +89,26 @@ export function ScrollScene() {
         // stutters, re-encode the MP4 as H.264, 1080p or lower, 24–30fps, with
         // frequent keyframes; long-GOP/high-resolution media seeks poorly.
         timeline.to(video, { currentTime: Math.max(0, video.duration - 0.04), duration: 10 }, 0);
-        timeline.to(mediaRef.current, { scale: 1.12, duration: 10 }, 0);
-        timeline.to(foregroundRef.current, { yPercent: -7, scale: 1.04, duration: 10 }, 0);
+        timeline.to(mediaRef.current, { scale: 1.055, duration: 10 }, 0);
+        timeline.to(foregroundRef.current, { yPercent: -4, scale: 1.02, duration: 10 }, 0);
         timeline.to(glowRef.current, { opacity: 0.5, duration: 10 }, 0);
 
         const transitions = [
-          { out: 1.2, enter: 1.45, leave: 2.75 },
-          { out: 3.05, enter: 3.3, leave: 4.65 },
-          { out: 4.95, enter: 5.2, leave: 6.75 },
-          { out: 7.05, enter: 7.35, leave: 8.45 },
+          { out: 1.2, enter: 1.75 },
+          { out: 3.05, enter: 3.6 },
+          { out: 4.95, enter: 5.5 },
+          { out: 7.05, enter: 7.6 },
         ];
 
-        transitions.forEach(({ out, enter, leave }, index) => {
+        transitions.forEach(({ out, enter }, index) => {
           timeline
             .to(scenes[index], { autoAlpha: 0, y: -40, duration: 0.55, pointerEvents: 'none' }, out)
             .to(scenes[index + 1], { autoAlpha: 1, y: 0, duration: 0.75, pointerEvents: 'auto' }, enter);
-
-          if (index + 1 < scenes.length - 1) {
-            timeline.to(scenes[index + 1], { autoAlpha: 0, y: -40, duration: 0.55, pointerEvents: 'none' }, leave);
-          }
         });
 
-        timeline.to(panels, { y: 0, duration: 0.9, stagger: 0.08 }, 1.6);
-        timeline.to('[data-dashboard-panel]', { y: 0, duration: 0.9 }, 3.35);
-        timeline.to('[data-variant-card]', { y: 0, duration: 0.9, stagger: 0.08 }, 5.25);
+        timeline.to(panels, { y: 0, duration: 0.9, stagger: 0.08 }, 1.85);
+        timeline.to('[data-dashboard-panel]', { y: 0, duration: 0.9 }, 3.7);
+        timeline.to('[data-variant-card]', { y: 0, duration: 0.9, stagger: 0.08 }, 5.6);
       }, root);
 
       ScrollTrigger.refresh();
@@ -158,7 +154,7 @@ export function ScrollScene() {
               onError={() => setVideoFailed(true)}
               data-testid="scroll-video"
             >
-              <source src="/watermark-removed-w.mp4" type="video/mp4" />
+              <source src="/watermark-removed-w.mp4?v=scrub-optimized" type="video/mp4" />
             </video>
           ) : null}
         </div>
