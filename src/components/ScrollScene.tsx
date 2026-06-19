@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Activity, ArrowUpRight, Check, Clock3, Copy, Download, FolderClosed, Link2, MousePointer2, Package, Pause, Terminal } from 'lucide-react';
 import { CloudField } from './CloudField';
+import { useFramerSmoothScroll } from '../hooks/useFramerSmoothScroll';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -48,6 +49,7 @@ const workflowSteps = [
 ];
 
 export function ScrollScene() {
+  const smoothScrollTo = useFramerSmoothScroll();
   const rootRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -91,7 +93,7 @@ export function ScrollScene() {
             trigger: stage,
             start: 'top top',
             end: '+=700%',
-            scrub: reduceMotion ? 0.15 : 1.15,
+            scrub: reduceMotion ? 0.15 : 0.72,
             pin: true,
             anticipatePin: 1,
             invalidateOnRefresh: true,
@@ -153,7 +155,7 @@ export function ScrollScene() {
     const trigger = timelineRef.current?.scrollTrigger;
     if (!trigger) return;
     const target = trigger.start + (trigger.end - trigger.start) * chapterStops[index];
-    window.scrollTo({ top: target, behavior: 'smooth' });
+    smoothScrollTo(target);
   };
 
   const copyCommand = async (command: string) => {
@@ -189,14 +191,21 @@ export function ScrollScene() {
         <div ref={foregroundRef} className="foreground-layer" aria-hidden="true" />
 
         <header className="site-header">
-          <button type="button" onClick={() => scrollToChapter(0)} className="package-mark" aria-label="Back to snoopy home">
-            <span className="package-mark__icon">s</span>
-            <span>snoopy</span>
-          </button>
-          <div className="scroll-status" aria-label="Video is paused and synced to scroll">
-            <Pause size={12} fill="currentColor" strokeWidth={1.5} />
-            <span>scroll synced</span>
-          </div>
+          <nav className="theme-navbar" aria-label="Primary navigation">
+            <button type="button" onClick={() => scrollToChapter(0)} className="navbar-brand" aria-label="Back to snoopy home">
+              <Terminal size={15} strokeWidth={1.6} />
+              <span>snoopy</span>
+            </button>
+            <div className="navbar-links">
+              <button type="button" onClick={() => scrollToChapter(1)}>Experience</button>
+              <button type="button" onClick={() => scrollToChapter(2)}>Session</button>
+              <button type="button" onClick={() => scrollToChapter(3)}>Variants</button>
+            </div>
+            <button type="button" onClick={() => copyCommand('npx snoopy')} className="navbar-command" aria-label="Copy npx snoopy command">
+              <code>npx snoopy</code>
+              {copiedCommand === 'npx snoopy' ? <Check size={13} /> : <Copy size={13} />}
+            </button>
+          </nav>
         </header>
 
         <main className="scene-stack">
