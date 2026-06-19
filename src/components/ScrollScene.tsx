@@ -318,10 +318,6 @@ export function ScrollScene() {
                 <Star size={13} fill="currentColor" strokeWidth={1.4} />
                 <span>12.8k</span>
               </button>
-              <button type="button" onClick={() => copyCommand('npx snoopy')} className="navbar-command" aria-label="Copy npx snoopy command">
-                <code>npx snoopy</code>
-                {copiedCommand === 'npx snoopy' ? <Check size={13} /> : <Copy size={13} />}
-              </button>
             </div>
           </nav>
         </header>

@@ -79,7 +79,6 @@ code, pre { font-family: 'DM Mono', monospace; }
 }
 
 .navbar-brand,
-.navbar-command,
 .navbar-icon-button,
 .github-stars,
 .navbar-links button {
@@ -172,30 +171,6 @@ code, pre { font-family: 'DM Mono', monospace; }
   border-color: rgba(239, 183, 120, 0.38);
   background: rgba(239, 183, 120, 0.1);
   outline: none;
-}
-
-.navbar-command {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.65rem;
-  min-height: 2.45rem;
-  padding: 0 0.9rem;
-  border: 1px solid rgba(255, 235, 211, 0.16);
-  border-radius: 999px;
-  background: rgba(255, 235, 211, 0.07);
-  transition: border-color 180ms ease, background-color 180ms ease;
-}
-
-.navbar-command:hover,
-.navbar-command:focus-visible {
-  border-color: rgba(239, 183, 120, 0.45);
-  background: rgba(239, 183, 120, 0.12);
-  outline: none;
-}
-
-.navbar-command code {
-  color: #f6d3a5;
-  font-size: 0.63rem;
 }
 
 .package-mark__icon {
@@ -715,7 +690,6 @@ code, pre { font-family: 'DM Mono', monospace; }
     min-height: 2.25rem;
     padding-inline: 0.58rem;
   }
-  .navbar-command { min-height: 2.25rem; }
   .scene { padding: 5.5rem 1.5rem 2.5rem; }
   .scene--hero { align-items: flex-end; padding: 5.5rem 1.5rem 5.2rem; }
   .hero-content { width: 100%; margin: 0; }
