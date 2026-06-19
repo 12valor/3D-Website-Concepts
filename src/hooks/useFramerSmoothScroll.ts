@@ -70,8 +70,8 @@ export function useFramerSmoothScroll() {
       }
 
       event.preventDefault();
-      const delta = normalizeWheelDelta(event);
-      smoothScrollTo(targetRef.current + delta, 0.72);
+      const delta = Math.max(-240, Math.min(240, normalizeWheelDelta(event)));
+      smoothScrollTo(targetRef.current + delta, 0.46);
     };
 
     window.addEventListener('scroll', syncTarget, { passive: true });

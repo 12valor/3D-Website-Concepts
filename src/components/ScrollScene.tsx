@@ -73,9 +73,8 @@ export function ScrollScene() {
 
     let frameRequest = 0;
     let videoFrameRequest = 0;
-    let lastFrameAt = 0;
 
-    const drawFrame = () => {
+    const drawFrame = (mediaTime = video.currentTime) => {
       frameRequest = 0;
       if (!video.videoWidth || !video.videoHeight) return;
 
@@ -117,21 +116,19 @@ export function ScrollScene() {
         height,
       );
 
+      canvas.dataset.mediaTime = mediaTime.toFixed(6);
       canvas.classList.add('is-ready');
     };
 
     const queueFrame = () => {
       if (frameRequest) cancelAnimationFrame(frameRequest);
-      frameRequest = requestAnimationFrame(drawFrame);
+      frameRequest = requestAnimationFrame(() => drawFrame());
     };
 
     const watchDecodedFrames = () => {
       if (!video.requestVideoFrameCallback) return;
-      videoFrameRequest = video.requestVideoFrameCallback((timestamp) => {
-        if (timestamp - lastFrameAt >= 1000 / 24) {
-          lastFrameAt = timestamp;
-          queueFrame();
-        }
+      videoFrameRequest = video.requestVideoFrameCallback((_, metadata) => {
+        drawFrame(metadata.mediaTime);
         watchDecodedFrames();
       });
     };
@@ -183,7 +180,7 @@ export function ScrollScene() {
             trigger: stage,
             start: 'top top',
             end: '+=700%',
-            scrub: reduceMotion ? 0.15 : 0.72,
+            scrub: reduceMotion ? 0.15 : true,
             pin: true,
             anticipatePin: 1,
             invalidateOnRefresh: true,
@@ -281,7 +278,7 @@ export function ScrollScene() {
               onError={() => setVideoFailed(true)}
               data-testid="scroll-video"
             >
-              <source src="/watermark-removed-w.mp4?v=scrub-optimized" type="video/mp4" />
+              <source src="/watermark-scroll-optimized.mp4" type="video/mp4" />
             </video>
           ) : null}
         </div>
