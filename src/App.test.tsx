@@ -32,10 +32,11 @@ describe('snoopy package experience', () => {
 
     expect(screen.getByRole('heading', { name: /run a quiet place from your browser/i })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /the video only moves when you do/i })).toBeInTheDocument();
-    expect(screen.getByText(/snoopy dashboard/i)).toBeInTheDocument();
+    expect(screen.getByText(/package dashboard/i)).toBeInTheDocument();
     expect(screen.getByText('snoopy-sunset')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /^Start Session$/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /^Restart Session$/i })).toBeInTheDocument();
+    expect(screen.queryByLabelText(/scroll progress/i)).not.toBeInTheDocument();
 
     const video = screen.getByTestId('scroll-video');
     expect(video).not.toHaveAttribute('autoplay');

@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Check, Copy, Pause, Terminal } from 'lucide-react';
+import { Activity, Check, Clock3, Copy, Download, Link2, MousePointer2, Package, Pause, Terminal } from 'lucide-react';
+import { CloudField } from './CloudField';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -16,10 +17,34 @@ const variants = [
 ];
 
 const dashboardStats = [
-  { label: 'Mood', value: 'Calm' },
-  { label: 'Noise Level', value: 'Low' },
-  { label: 'Session Time', value: '02:48' },
-  { label: 'Scroll Sync', value: 'Active' },
+  { label: 'Mood', value: 'Calm', icon: Activity },
+  { label: 'Noise', value: 'Low', icon: Pause },
+  { label: 'Session', value: '02:48', icon: Clock3 },
+  { label: 'Frame', value: '04:35 / 10:00', icon: MousePointer2 },
+];
+
+const workflowSteps = [
+  {
+    number: '01',
+    title: 'Install',
+    description: 'Launch the package with one quiet command.',
+    command: 'npx snoopy',
+    icon: Download,
+  },
+  {
+    number: '02',
+    title: 'Bind',
+    description: 'Connect the session to a cinematic video element.',
+    command: 'scroll.bind(video)',
+    icon: Link2,
+  },
+  {
+    number: '03',
+    title: 'Scroll',
+    description: 'Move to seek. Stop to hold the exact frame.',
+    command: 'pauseWhenIdle()',
+    icon: MousePointer2,
+  },
 ];
 
 export function ScrollScene() {
@@ -174,18 +199,6 @@ export function ScrollScene() {
           </div>
         </header>
 
-        <aside className="chapter-progress" aria-label="Scroll progress">
-          <div className="chapter-progress__track">
-            <div ref={progressRef} className="chapter-progress__fill" />
-            <div className="chapter-progress__dots">
-              {chapters.map((chapter, index) => (
-                <button key={chapter} type="button" onClick={() => scrollToChapter(index)} aria-label={`Go to ${chapter}`} />
-              ))}
-            </div>
-          </div>
-          <span ref={counterRef}>01 / 05</span>
-        </aside>
-
         <main className="scene-stack">
           <section data-scene="hero" className="scene scene--hero">
             <div className="hero-content">
@@ -215,46 +228,95 @@ export function ScrollScene() {
           </section>
 
           <section data-scene="sync" className="scene scene--split">
-            <div>
+            <div className="sync-copy">
               <p className="section-label">Scroll Sync</p>
               <h2 aria-label="The video only moves when you do.">
                 The video only moves
                 <span>when you do.</span>
               </h2>
+              <p className="section-summary">A deterministic cinematic timeline: every gesture maps to a frame, and every pause stays perfectly still.</p>
             </div>
-            <div data-panel className="code-window">
-              <div className="code-window__bar">
-                <div aria-hidden="true"><span /><span /><span /></div>
-                <span>snoopy.config.js</span>
+            <div data-panel className="workflow-panel">
+              <div className="workflow-panel__header">
+                <span>How snoopy works</span>
+                <code>3 quiet steps</code>
               </div>
-              <pre><code><i>import</i> scroll <i>from</i> <b>'snoopy'</b>{'\n\n'}scroll.bind(video).{'\n'}{'  '}pauseWhenIdle()</code></pre>
-              <div className="code-window__footer"><Pause size={12} fill="currentColor" />Paused on the exact frame</div>
+              <div className="workflow-list">
+                {workflowSteps.map(({ number, title, description, command, icon: Icon }) => (
+                  <article key={number} className="workflow-step">
+                    <div className="workflow-step__icon"><Icon size={17} strokeWidth={1.5} /></div>
+                    <div>
+                      <span>{number}</span>
+                      <h3>{title}</h3>
+                      <p>{description}</p>
+                    </div>
+                    <code>{command}</code>
+                  </article>
+                ))}
+              </div>
             </div>
           </section>
 
           <section data-scene="dashboard" className="scene scene--dashboard">
+            <CloudField />
             <div className="scene-heading">
-              <p className="section-label">Snoopy Dashboard</p>
+              <p className="section-label">Package Dashboard</p>
               <h2 aria-label="A small window into your quieter moment.">
-                A small window into
-                <span>your quieter moment.</span>
+                snoopy <i>/</i> session
               </h2>
+              <p className="section-summary">A real-time view of your cinematic session, package state, and frame-level progress.</p>
             </div>
             <div data-dashboard-panel className="dashboard-shell">
               <div className="dashboard-topbar">
-                <div className="package-mark"><span className="package-mark__icon">s</span><span>session.local</span></div>
-                <span className="live-indicator"><i />listening to scroll</span>
+                <div className="dashboard-identity">
+                  <span className="package-mark__icon">s</span>
+                  <span>snoopy</span>
+                  <i>/</i>
+                  <strong>session</strong>
+                </div>
+                <span className="live-indicator"><i />scroll sync active</span>
               </div>
-              <div className="dashboard-grid">
-                <div className="dashboard-scene">
-                  <span>Background</span><strong>Sunset Hill</strong>
-                  <p>One frame at a time. No autoplay. No hurry.</p>
-                  <div className="dashboard-progress"><span /></div>
+              <div className="dashboard-overview">
+                <div className="environment-card">
+                  <div className="environment-card__art"><span /></div>
+                  <div>
+                    <small>Environment</small>
+                    <strong>Sunset Hill</strong>
+                    <p>A calm place to think in frames.</p>
+                  </div>
                 </div>
                 <div className="dashboard-stats">
-                  {dashboardStats.map((stat) => (
-                    <div key={stat.label} className="stat-row"><span>{stat.label}</span><strong>{stat.value}</strong></div>
+                  {dashboardStats.map(({ label, value, icon: Icon }) => (
+                    <div key={label} className="stat-card">
+                      <span><Icon size={13} strokeWidth={1.5} />{label}</span>
+                      <strong>{value}</strong>
+                    </div>
                   ))}
+                </div>
+              </div>
+              <div className="frame-timeline">
+                <div className="frame-timeline__header"><span>Frame timeline</span><code>paused on exact frame</code></div>
+                <div className="frame-strip">
+                  {Array.from({ length: 12 }, (_, index) => <span key={index} style={{ '--frame': index } as CSSProperties} />)}
+                  <i />
+                </div>
+                <div className="frame-times"><span>00:00</span><span>02:30</span><span>05:00</span><span>07:30</span><span>10:00</span></div>
+              </div>
+              <div className="dashboard-bottom">
+                <div className="command-history">
+                  <span>Command history</span>
+                  <code><i>›</i> npx snoopy <small>09:41:12</small></code>
+                  <code><i>›</i> npx snoopy --breathe <small>09:43:28</small></code>
+                  <code><i>›</i> npx snoopy --variant sunset <small>09:45:11</small></code>
+                </div>
+                <div className="package-summary">
+                  <Package size={24} strokeWidth={1.3} />
+                  <div><span>Package</span><strong>snoopy</strong><code>1.4.2 · MIT</code></div>
+                </div>
+                <div className="session-status">
+                  <span><i />Active</span>
+                  <p>Frame updates with your scroll and stops exactly when you stop.</p>
+                  <code><Pause size={12} fill="currentColor" />paused</code>
                 </div>
               </div>
             </div>
