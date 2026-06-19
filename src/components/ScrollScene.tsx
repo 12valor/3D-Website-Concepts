@@ -236,29 +236,117 @@ export function ScrollScene() {
               </h2>
               <p className="section-summary">A deterministic cinematic timeline: every gesture maps to a frame, and every pause stays perfectly still.</p>
             </div>
-            <div data-panel className="workflow-panel">
-              <div className="workflow-panel__header">
-                <span>How snoopy works</span>
-                <code>3 quiet steps</code>
+            <div data-panel className="code-window">
+              <div className="code-window__bar">
+                <div aria-hidden="true"><span /><span /><span /></div>
+                <span>snoopy.config.js</span>
               </div>
-              <div className="workflow-list">
-                {workflowSteps.map(({ number, title, description, command, icon: Icon }) => (
-                  <article key={number} className="workflow-step">
-                    <div className="workflow-step__icon"><Icon size={17} strokeWidth={1.5} /></div>
-                    <div>
-                      <span>{number}</span>
-                      <h3>{title}</h3>
-                      <p>{description}</p>
-                    </div>
-                    <code>{command}</code>
-                  </article>
-                ))}
+              <pre><code><i>import</i> scroll <i>from</i> <b>'snoopy'</b>{'\n\n'}<i>const</i> video = document.querySelector(<b>'video'</b>){'\n\n'}scroll.bind(video).{'\n'}{'  '}pauseWhenIdle()</code></pre>
+              <div className="code-window__footer">
+                <Pause size={12} fill="currentColor" />
+                Paused on the exact frame
               </div>
             </div>
           </section>
 
           <section data-scene="dashboard" className="scene scene--dashboard">
             <CloudField />
+            <div data-dashboard-panel className="platform-showcase">
+              <div className="platform-upper">
+                <aside className="platform-intro">
+                  <p className="section-label">Package Dashboard</p>
+                  <h2>snoopy <i>/</i> session</h2>
+                  <p>A tiny command that turns scrolling into a quiet, cinematic experience.</p>
+                  <button type="button" onClick={() => copyCommand('npx snoopy')} className="platform-command">
+                    <Terminal size={17} strokeWidth={1.5} />
+                    <code>npx snoopy</code>
+                    {copiedCommand === 'npx snoopy' ? <Check size={14} /> : <Copy size={14} />}
+                  </button>
+                  <div className="platform-meta">
+                    <span><Package size={13} />version <strong>1.4.2</strong></span>
+                    <span>◉ license <strong>MIT</strong></span>
+                  </div>
+                </aside>
+
+                <div className="dashboard-shell dashboard-shell--platform">
+                  <div className="dashboard-topbar">
+                    <div className="dashboard-identity">
+                      <span className="window-dots"><i /><i /><i /></span>
+                      <span className="package-mark__icon">s</span>
+                      <span>snoopy</span>
+                      <i>/</i>
+                      <strong>session</strong>
+                    </div>
+                    <span className="live-indicator"><i />scroll sync active</span>
+                  </div>
+                  <div className="dashboard-overview">
+                    <div className="environment-card">
+                      <div className="environment-card__art"><span /></div>
+                      <div>
+                        <small>Environment</small>
+                        <strong>Sunset Hill</strong>
+                        <p>A calm place to think in frames.</p>
+                      </div>
+                    </div>
+                    <div className="dashboard-stats">
+                      {dashboardStats.map(({ label, value, icon: Icon }) => (
+                        <div key={label} className="stat-card">
+                          <span><Icon size={13} strokeWidth={1.5} />{label}</span>
+                          <strong>{value}</strong>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="frame-timeline">
+                    <div className="frame-timeline__header"><span>Frame timeline</span><code>paused on exact frame</code></div>
+                    <div className="frame-strip">
+                      {Array.from({ length: 12 }, (_, index) => <span key={index} style={{ '--frame': index } as CSSProperties} />)}
+                      <i />
+                    </div>
+                    <div className="frame-times"><span>00:00</span><span>02:30</span><span>05:00</span><span>07:30</span><span>10:00</span></div>
+                  </div>
+                  <div className="dashboard-bottom">
+                    <div className="command-history">
+                      <span>Command history</span>
+                      <code><i>›</i> npx snoopy <small>09:41:12</small></code>
+                      <code><i>›</i> npx snoopy --breathe <small>09:43:28</small></code>
+                      <code><i>›</i> npx snoopy --dashboard <small>09:44:03</small></code>
+                      <code><i>›</i> npx snoopy --variant sunset <small>09:45:11</small></code>
+                    </div>
+                    <div className="package-summary">
+                      <Package size={24} strokeWidth={1.3} />
+                      <div><span>Package</span><strong>snoopy</strong><code>1.4.2 · MIT</code></div>
+                    </div>
+                    <div className="session-status">
+                      <span><i />Active</span>
+                      <p>Video is paused. Frame updates with your scroll and stops exactly when you stop.</p>
+                      <code><Pause size={12} fill="currentColor" />paused on exact frame</code>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="platform-workflow">
+                <p className="platform-workflow__label">How snoopy works</p>
+                <div className="platform-workflow__grid">
+                  {workflowSteps.map(({ number, title, description, command, icon: Icon }) => (
+                    <article key={number} className={`workflow-card workflow-card--${title.toLowerCase()}`}>
+                      <header>
+                        <span>{number}</span>
+                        <div><h3>{title}</h3><p>{description}</p></div>
+                        <Icon size={20} strokeWidth={1.4} />
+                      </header>
+                      <div className="workflow-illustration">
+                        <code>{command}</code>
+                        {title === 'Install' ? <small>ready to create quiet moments.</small> : null}
+                        {title === 'Bind' ? <div className="bind-graph"><span /><i /></div> : null}
+                        {title === 'Scroll' ? <div className="scroll-film"><span /><span /><span /><span /><i><Pause size={13} /></i></div> : null}
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            </div>
             <div className="scene-heading">
               <p className="section-label">Package Dashboard</p>
               <h2 aria-label="A small window into your quieter moment.">

@@ -193,10 +193,27 @@ button.package-mark { cursor: pointer; }
 .story-button:hover { background: #ffe4bd; transform: translateY(-2px); }
 .story-button:focus-visible, button:focus-visible { outline: 2px solid #f6d3a5; outline-offset: 4px; }
 
-.workflow-panel, .dashboard-shell, .package-card {
+.code-window, .workflow-panel, .dashboard-shell, .package-card, .workflow-card {
   border: 1px solid rgba(255, 235, 211, 0.22);
   background: rgba(17, 9, 5, 0.78);
 }
+.code-window { width: min(31rem, 40vw); flex: 0 0 auto; overflow: hidden; border-radius: 1rem; }
+.code-window__bar, .code-window__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid rgba(255, 235, 211, 0.13);
+  color: rgba(255, 243, 223, 0.48);
+  font-family: 'DM Mono', monospace;
+  font-size: 0.56rem;
+}
+.code-window__bar > div { display: flex; gap: 0.35rem; }
+.code-window__bar > div span { width: 0.38rem; height: 0.38rem; border-radius: 50%; background: rgba(255, 235, 211, 0.3); }
+.code-window pre { overflow: hidden; margin: 0; padding: 1.75rem 1.25rem; color: #fff3df; font-size: 0.72rem; line-height: 1.85; }
+.code-window pre i { color: rgba(255, 243, 223, 0.45); font-style: normal; }
+.code-window pre b { color: #efb778; font-weight: 400; }
+.code-window__footer { justify-content: flex-start; gap: 0.5rem; border-top: 1px solid rgba(255, 235, 211, 0.13); border-bottom: 0; color: rgba(239, 183, 120, 0.74); }
 .workflow-panel {
   width: min(35rem, 43vw);
   flex: 0 0 auto;
@@ -263,6 +280,8 @@ button.package-mark { cursor: pointer; }
 
 .scene--dashboard, .scene--variants { flex-direction: column; justify-content: center; }
 .scene--dashboard { isolation: isolate; }
+.scene--dashboard > .scene-heading,
+.scene--dashboard > .dashboard-shell { display: none; }
 .scene-heading { position: relative; z-index: 2; margin-bottom: 1.25rem; }
 .scene-heading h2 { font-size: clamp(2.8rem, 5.2vw, 5.2rem); }
 .scene-heading h2 i { color: rgba(239, 183, 120, 0.5); font-style: normal; }
@@ -283,6 +302,60 @@ button.package-mark { cursor: pointer; }
   opacity: 0.82;
 }
 .cloud-field canvas { width: 100% !important; height: 100% !important; }
+.platform-showcase {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  transform: translateY(34px);
+  will-change: transform, opacity;
+}
+.platform-upper { display: grid; grid-template-columns: minmax(14rem, 0.28fr) minmax(0, 0.72fr); align-items: stretch; gap: 1.25rem; }
+.platform-intro {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  padding: 0.5rem 0;
+}
+.platform-intro h2 {
+  margin: 0;
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: clamp(2.6rem, 4.2vw, 4.8rem);
+  font-weight: 400;
+  line-height: 0.95;
+  letter-spacing: -0.045em;
+}
+.platform-intro h2 i { color: rgba(239, 183, 120, 0.55); font-style: normal; }
+.platform-intro > p:not(.section-label) {
+  max-width: 18rem;
+  margin: 1rem 0 0;
+  color: rgba(255, 243, 223, 0.65);
+  font-size: 0.78rem;
+  font-weight: 300;
+  line-height: 1.65;
+}
+.platform-command {
+  display: flex;
+  width: min(13.5rem, 100%);
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid rgba(239, 183, 120, 0.6);
+  border-radius: 0.55rem;
+  color: #f5c58d;
+  background: rgba(17, 9, 5, 0.66);
+  cursor: pointer;
+}
+.platform-command code { flex: 1; font-size: 0.76rem; text-align: left; }
+.platform-meta { display: grid; gap: 0.45rem; margin-top: 1.15rem; color: rgba(255, 243, 223, 0.48); font-family: 'DM Mono', monospace; font-size: 0.52rem; }
+.platform-meta span { display: flex; align-items: center; gap: 0.45rem; }
+.platform-meta strong { margin-left: 0.35rem; color: rgba(255, 243, 223, 0.7); font-weight: 400; }
+.dashboard-shell--platform { transform: none; }
+.window-dots { display: flex; gap: 0.3rem; margin-right: 0.3rem; }
+.window-dots i { width: 0.4rem; height: 0.4rem; border-radius: 50%; background: #b94a32; }
+.window-dots i:nth-child(2) { background: #d28f32; }
+.window-dots i:nth-child(3) { background: #6e925c; }
 .dashboard-topbar { display: flex; align-items: center; justify-content: space-between; padding: 0.72rem 0.9rem; border-bottom: 1px solid rgba(255, 235, 211, 0.14); background: rgba(10, 6, 4, 0.4); }
 .dashboard-identity { display: flex; align-items: center; gap: 0.55rem; font-family: 'DM Mono', monospace; font-size: 0.64rem; }
 .dashboard-identity i { color: rgba(255, 243, 223, 0.3); font-style: normal; }
@@ -346,6 +419,65 @@ button.package-mark { cursor: pointer; }
 .session-status p { margin: 0.5rem 0; color: rgba(255, 243, 223, 0.48); font-size: 0.56rem; line-height: 1.5; }
 .session-status code { display: flex; width: fit-content; align-items: center; gap: 0.4rem; padding: 0.35rem 0.45rem; border: 1px solid rgba(255, 235, 211, 0.1); color: rgba(239, 183, 120, 0.75); font-size: 0.48rem; }
 
+.platform-workflow { margin-top: 0.8rem; }
+.platform-workflow__label {
+  margin: 0 0 0.5rem;
+  color: rgba(239, 183, 120, 0.72);
+  font-family: 'DM Mono', monospace;
+  font-size: 0.52rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.platform-workflow__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; }
+.workflow-card {
+  min-width: 0;
+  min-height: 9.5rem;
+  border-radius: 0.75rem;
+  padding: 0.8rem;
+}
+.workflow-card header { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 0.7rem; }
+.workflow-card header > span {
+  display: grid;
+  width: 1.7rem;
+  height: 1.7rem;
+  place-items: center;
+  border: 1px solid rgba(239, 183, 120, 0.45);
+  border-radius: 50%;
+  color: #efb778;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.54rem;
+}
+.workflow-card h3 { margin: 0; font-family: 'Instrument Serif', serif; font-size: 1.35rem; font-weight: 400; }
+.workflow-card header p { margin: 0.05rem 0 0; color: rgba(255, 243, 223, 0.45); font-size: 0.58rem; }
+.workflow-card header > svg { color: rgba(239, 183, 120, 0.72); }
+.workflow-illustration {
+  position: relative;
+  min-height: 5.1rem;
+  margin-top: 0.65rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 235, 211, 0.12);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  background: rgba(6, 4, 3, 0.34);
+}
+.workflow-illustration > code { color: #efb778; font-size: 0.57rem; }
+.workflow-illustration > small { display: block; margin-top: 0.65rem; color: rgba(255, 243, 223, 0.5); font-family: 'DM Mono', monospace; font-size: 0.48rem; }
+.bind-graph { position: absolute; right: 0.75rem; bottom: 0.7rem; left: 45%; height: 2.8rem; border-left: 1px solid rgba(239, 183, 120, 0.18); border-bottom: 1px solid rgba(239, 183, 120, 0.18); }
+.bind-graph::before {
+  position: absolute;
+  inset: 0.8rem 0.4rem 0.4rem;
+  border-top: 1px solid rgba(239, 183, 120, 0.7);
+  border-radius: 50%;
+  content: '';
+  transform: rotate(-12deg);
+}
+.bind-graph span, .bind-graph i { position: absolute; width: 0.38rem; height: 0.38rem; border-radius: 50%; background: #efb778; }
+.bind-graph span { left: 24%; bottom: 25%; }
+.bind-graph i { right: 18%; top: 10%; }
+.scroll-film { position: absolute; right: 0.75rem; bottom: 0.75rem; left: 0.75rem; display: grid; grid-template-columns: repeat(4, 1fr); height: 2.6rem; border: 1px solid rgba(239, 183, 120, 0.25); }
+.scroll-film > span { border-right: 1px solid rgba(255, 235, 211, 0.12); background: url('/quiet-place.jpg') center / cover; }
+.scroll-film > i { position: absolute; top: 50%; left: 50%; display: grid; width: 2rem; height: 2rem; place-items: center; border: 1px solid #efb778; border-radius: 0.45rem; color: #efb778; background: #24130c; transform: translate(-50%, -50%); }
+
 .variant-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.75rem; }
 .package-card {
   display: flex;
@@ -398,6 +530,10 @@ button.package-mark { cursor: pointer; }
   .dashboard-bottom { grid-template-columns: 1.25fr 0.75fr; }
   .session-status { display: none; }
   .dashboard-bottom > div:nth-child(2) { border-right: 0; }
+  .platform-upper { grid-template-columns: 1fr; }
+  .platform-intro { display: none; }
+  .platform-workflow__grid { gap: 0.5rem; }
+  .workflow-card { min-height: 8.5rem; padding: 0.65rem; }
 }
 
 @media (max-width: 640px) {
@@ -431,6 +567,10 @@ button.package-mark { cursor: pointer; }
   .dashboard-bottom > div { border-right: 0; }
   .command-history code:nth-of-type(3) { display: none; }
   .cloud-field { display: none; }
+  .platform-showcase { transform: translateY(34px) scale(0.96); transform-origin: center; }
+  .platform-workflow { display: none; }
+  .dashboard-shell--platform { display: block; }
+  .window-dots { display: none; }
   .variant-grid { gap: 0.5rem; }
   .package-card { min-height: 9.5rem; padding: 0.85rem; }
   .package-card h3 { margin: 0.9rem 0 0.4rem; font-size: 0.68rem; }
