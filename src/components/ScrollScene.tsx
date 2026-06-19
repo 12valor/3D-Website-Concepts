@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Activity, Check, Clock3, Copy, Download, Link2, MousePointer2, Package, Pause, Terminal } from 'lucide-react';
+import { Activity, ArrowUpRight, Check, Clock3, Copy, Download, FolderClosed, Link2, MousePointer2, Package, Pause, Terminal } from 'lucide-react';
 import { CloudField } from './CloudField';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -202,11 +202,11 @@ export function ScrollScene() {
         <main className="scene-stack">
           <section data-scene="hero" className="scene scene--hero">
             <div className="hero-content">
-              <div className="terminal-line">
+              <button type="button" onClick={() => copyCommand('npx snoopy')} className="terminal-line hero-command" aria-label="Copy npx snoopy command">
                 <Terminal size={14} strokeWidth={1.5} />
                 <code>npx snoopy</code>
-                <span className="terminal-cursor" aria-hidden="true" />
-              </div>
+                {copiedCommand === 'npx snoopy' ? <Check size={14} /> : <Copy size={14} />}
+              </button>
               <h1 aria-label="Run a quiet place from your browser.">
                 Run a quiet place
                 <span>from your browser.</span>
@@ -216,10 +216,10 @@ export function ScrollScene() {
                 <em>A tiny command for when the world gets too loud.</em>
                 <div className="hero-actions">
                   <button type="button" onClick={() => scrollToChapter(1)} className="story-button">
-                    <span>Start Session</span><span aria-hidden="true">↓</span>
+                    <span>Start Session</span><ArrowUpRight size={15} strokeWidth={1.6} />
                   </button>
                   <button type="button" onClick={() => scrollToChapter(3)} className="story-button story-button--ghost">
-                    <span>View Packages</span><Terminal size={14} strokeWidth={1.5} />
+                    <span>View Packages</span><FolderClosed size={14} strokeWidth={1.5} />
                   </button>
                 </div>
               </div>
