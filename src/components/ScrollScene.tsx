@@ -60,6 +60,7 @@ export function ScrollScene() {
   const progressRef = useRef<HTMLDivElement>(null);
   const counterRef = useRef<HTMLSpanElement>(null);
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
+  const scheduleFrameHoldRef = useRef<() => void>(() => undefined);
   const [videoFailed, setVideoFailed] = useState(false);
   const [copiedCommand, setCopiedCommand] = useState<string | null>(null);
 
@@ -72,15 +73,18 @@ export function ScrollScene() {
     if (!context) return;
 
     let frameRequest = 0;
-    let videoFrameRequest = 0;
+    let holdTimer = 0;
+    let captureVersion = 0;
 
-    const drawFrame = () => {
+    const drawFrame = (showFrame = true) => {
       frameRequest = 0;
       if (!video.videoWidth || !video.videoHeight) return;
 
-      const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-      const width = Math.max(1, Math.round(canvas.clientWidth * pixelRatio));
-      const height = Math.max(1, Math.round(canvas.clientHeight * pixelRatio));
+      const displayWidth = Math.max(1, canvas.clientWidth);
+      const displayHeight = Math.max(1, canvas.clientHeight);
+      const renderScale = Math.min(1, 1280 / displayWidth);
+      const width = Math.max(1, Math.round(displayWidth * renderScale));
+      const height = Math.max(1, Math.round(displayHeight * renderScale));
 
       if (canvas.width !== width || canvas.height !== height) {
         canvas.width = width;
@@ -113,35 +117,51 @@ export function ScrollScene() {
         width,
         height,
       );
+
+      if (showFrame) canvas.classList.add('is-held');
     };
 
-    const queueFrame = () => {
+    const queueFrame = (showFrame = true) => {
       if (frameRequest) cancelAnimationFrame(frameRequest);
-      frameRequest = requestAnimationFrame(drawFrame);
+      frameRequest = requestAnimationFrame(() => drawFrame(showFrame));
     };
 
-    const watchDecodedFrames = () => {
-      if (!video.requestVideoFrameCallback) return;
-      videoFrameRequest = video.requestVideoFrameCallback(() => {
-        queueFrame();
-        watchDecodedFrames();
-      });
+    const captureHeldFrame = (version: number) => {
+      if (version !== captureVersion) return;
+
+      if (video.seeking) {
+        video.addEventListener('seeked', () => captureHeldFrame(version), { once: true });
+        return;
+      }
+
+      queueFrame();
     };
 
-    const resizeObserver = new ResizeObserver(queueFrame);
-    resizeObserver.observe(canvas);
-    video.addEventListener('loadeddata', queueFrame);
-    video.addEventListener('seeked', queueFrame);
-    watchDecodedFrames();
+    const scheduleFrameHold = () => {
+      captureVersion += 1;
+      const version = captureVersion;
+      canvas.classList.remove('is-held');
+      window.clearTimeout(holdTimer);
+      holdTimer = window.setTimeout(() => captureHeldFrame(version), 90);
+    };
 
-    if (video.readyState >= 2) queueFrame();
+    const refreshHeldFrame = () => {
+      captureVersion += 1;
+      captureHeldFrame(captureVersion);
+    };
+
+    scheduleFrameHoldRef.current = scheduleFrameHold;
+    video.addEventListener('loadeddata', refreshHeldFrame);
+    window.addEventListener('resize', refreshHeldFrame, { passive: true });
+
+    if (video.readyState >= 2) refreshHeldFrame();
 
     return () => {
+      scheduleFrameHoldRef.current = () => undefined;
       if (frameRequest) cancelAnimationFrame(frameRequest);
-      if (videoFrameRequest) video.cancelVideoFrameCallback(videoFrameRequest);
-      resizeObserver.disconnect();
-      video.removeEventListener('loadeddata', queueFrame);
-      video.removeEventListener('seeked', queueFrame);
+      window.clearTimeout(holdTimer);
+      video.removeEventListener('loadeddata', refreshHeldFrame);
+      window.removeEventListener('resize', refreshHeldFrame);
     };
   }, []);
 
@@ -182,6 +202,7 @@ export function ScrollScene() {
             invalidateOnRefresh: true,
             onUpdate: (self) => {
               video.pause();
+              scheduleFrameHoldRef.current();
               if (progressRef.current) {
                 progressRef.current.style.transform = `scaleY(${self.progress})`;
               }

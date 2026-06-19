@@ -24,12 +24,14 @@ code, pre { font-family: 'DM Mono', monospace; }
 .cinematic-media { position: absolute; inset: -3%; transform-origin: center; will-change: transform; }
 .cinematic-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .cinematic-frame {
-  z-index: 1;
+  z-index: 2;
   display: block;
-}
-.scrub-video-source {
-  z-index: 0;
   opacity: 0;
+  pointer-events: none;
+}
+.cinematic-frame.is-held { opacity: 1; }
+.scrub-video-source {
+  z-index: 1;
   pointer-events: none;
 }
 .cinematic-shade {
