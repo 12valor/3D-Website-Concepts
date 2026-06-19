@@ -62,20 +62,6 @@ export function LandingSections() {
 
   return (
     <div className="landing-sections">
-      {/* Cinematic video background */}
-      <div className="landing-bg" aria-hidden="true">
-        <video
-          className="landing-bg__video"
-          muted
-          loop
-          autoPlay
-          playsInline
-          poster="/quiet-place.jpg"
-        >
-          <source src="/watermark-scroll-optimized.mp4" type="video/mp4" />
-        </video>
-        <div className="landing-bg__overlay" />
-      </div>
 
       {/* ─── FAQ ─── */}
       <section className="landing-section section-faq" id="faq">
