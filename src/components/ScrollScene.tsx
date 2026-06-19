@@ -52,7 +52,7 @@ export function ScrollScene() {
   const rootRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const bufferVideoRef = useRef<HTMLVideoElement>(null);
   const mediaRef = useRef<HTMLDivElement>(null);
   const foregroundRef = useRef<HTMLDivElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
@@ -64,105 +64,72 @@ export function ScrollScene() {
   const [copiedCommand, setCopiedCommand] = useState<string | null>(null);
 
   useEffect(() => {
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    if (!video || !canvas || navigator.userAgent.includes('jsdom')) return;
-
-    const context = canvas.getContext('2d');
-    if (!context) return;
-
-    let frameRequest = 0;
-    let videoFrameRequest = 0;
-
-    const drawFrame = (mediaTime = video.currentTime) => {
-      frameRequest = 0;
-      if (!video.videoWidth || !video.videoHeight) return;
-
-      const displayWidth = Math.max(1, canvas.clientWidth);
-      const displayHeight = Math.max(1, canvas.clientHeight);
-      const renderScale = Math.min(1, 960 / displayWidth);
-      const width = Math.max(1, Math.round(displayWidth * renderScale));
-      const height = Math.max(1, Math.round(displayHeight * renderScale));
-
-      if (canvas.width !== width || canvas.height !== height) {
-        canvas.width = width;
-        canvas.height = height;
-      }
-
-      const sourceRatio = video.videoWidth / video.videoHeight;
-      const targetRatio = width / height;
-      let sourceX = 0;
-      let sourceY = 0;
-      let sourceWidth = video.videoWidth;
-      let sourceHeight = video.videoHeight;
-
-      if (sourceRatio > targetRatio) {
-        sourceWidth = video.videoHeight * targetRatio;
-        sourceX = (video.videoWidth - sourceWidth) / 2;
-      } else {
-        sourceHeight = video.videoWidth / targetRatio;
-        sourceY = (video.videoHeight - sourceHeight) / 2;
-      }
-
-      context.drawImage(
-        video,
-        sourceX,
-        sourceY,
-        sourceWidth,
-        sourceHeight,
-        0,
-        0,
-        width,
-        height,
-      );
-
-      canvas.dataset.mediaTime = mediaTime.toFixed(6);
-      canvas.classList.add('is-ready');
-    };
-
-    const queueFrame = () => {
-      if (frameRequest) cancelAnimationFrame(frameRequest);
-      frameRequest = requestAnimationFrame(() => drawFrame());
-    };
-
-    const watchDecodedFrames = () => {
-      if (!video.requestVideoFrameCallback) return;
-      videoFrameRequest = video.requestVideoFrameCallback((_, metadata) => {
-        drawFrame(metadata.mediaTime);
-        watchDecodedFrames();
-      });
-    };
-
-    video.addEventListener('loadeddata', queueFrame);
-    video.addEventListener('seeked', queueFrame);
-    window.addEventListener('resize', queueFrame, { passive: true });
-    watchDecodedFrames();
-
-    if (video.readyState >= 2) queueFrame();
-
-    return () => {
-      if (frameRequest) cancelAnimationFrame(frameRequest);
-      if (videoFrameRequest) video.cancelVideoFrameCallback?.(videoFrameRequest);
-      video.removeEventListener('loadeddata', queueFrame);
-      video.removeEventListener('seeked', queueFrame);
-      window.removeEventListener('resize', queueFrame);
-    };
-  }, []);
-
-  useEffect(() => {
     const root = rootRef.current;
     const stage = stageRef.current;
     const video = videoRef.current;
-    if (!root || !stage || !video) return;
+    const bufferVideo = bufferVideoRef.current;
+    if (!root || !stage || !video || !bufferVideo) return;
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let context: gsap.Context | undefined;
+    let initialized = false;
+    let disposed = false;
 
     const createScrubTimeline = () => {
-      if (!Number.isFinite(video.duration) || video.duration <= 0) return;
+      if (
+        initialized ||
+        video.readyState < 1 ||
+        bufferVideo.readyState < 1 ||
+        !Number.isFinite(video.duration) ||
+        video.duration <= 0
+      ) return;
 
+      initialized = true;
       video.pause();
+      bufferVideo.pause();
       video.currentTime = 0;
+      bufferVideo.currentTime = 0;
+      video.classList.add('is-active');
+
+      let activeVideo = video;
+      let hiddenVideo = bufferVideo;
+      let targetTime = 0;
+      let seekingFrame = false;
+      const scrubClock = { time: 0 };
+
+      const seekNextFrame = () => {
+        if (disposed || seekingFrame) return;
+
+        const requestedTime = targetTime;
+        seekingFrame = true;
+
+        const commitFrame = () => {
+          if (disposed) return;
+
+          hiddenVideo.pause();
+          hiddenVideo.classList.add('is-active');
+          activeVideo.classList.remove('is-active');
+          [activeVideo, hiddenVideo] = [hiddenVideo, activeVideo];
+          seekingFrame = false;
+
+          if (Math.abs(targetTime - requestedTime) > 1 / 48) {
+            seekNextFrame();
+          }
+        };
+
+        if (Math.abs(hiddenVideo.currentTime - requestedTime) <= 0.001 && !hiddenVideo.seeking) {
+          commitFrame();
+          return;
+        }
+
+        hiddenVideo.addEventListener('seeked', commitFrame, { once: true });
+        hiddenVideo.currentTime = requestedTime;
+      };
+
+      const requestFrame = (time: number) => {
+        targetTime = Math.max(0, Math.min(video.duration - 0.04, time));
+        seekNextFrame();
+      };
 
       context = gsap.context(() => {
         const scenes = gsap.utils.toArray<HTMLElement>('[data-scene]');
@@ -180,12 +147,13 @@ export function ScrollScene() {
             trigger: stage,
             start: 'top top',
             end: '+=700%',
-            scrub: reduceMotion ? 0.15 : true,
+            scrub: reduceMotion ? 0.15 : 0.35,
             pin: true,
             anticipatePin: 1,
             invalidateOnRefresh: true,
             onUpdate: (self) => {
               video.pause();
+              bufferVideo.pause();
               const active = Math.min(chapters.length - 1, Math.floor(self.progress * chapters.length));
               if (active !== activeChapterRef.current) {
                 activeChapterRef.current = active;
@@ -211,7 +179,11 @@ export function ScrollScene() {
         // GSAP owns currentTime for the full pinned sequence. If seeking still
         // stutters, re-encode the MP4 as H.264, 1080p or lower, 24–30fps, with
         // frequent keyframes; long-GOP/high-resolution media seeks poorly.
-        timeline.to(video, { currentTime: Math.max(0, video.duration - 0.04), duration: 10 }, 0);
+        timeline.to(scrubClock, {
+          time: Math.max(0, video.duration - 0.04),
+          duration: 10,
+          onUpdate: () => requestFrame(scrubClock.time),
+        }, 0);
         timeline.to(mediaRef.current, { scale: 1.055, duration: 10 }, 0);
         timeline.to(foregroundRef.current, { yPercent: -4, scale: 1.02, duration: 10 }, 0);
         timeline.to(glowRef.current, { opacity: 0.5, duration: 10 }, 0);
@@ -237,11 +209,14 @@ export function ScrollScene() {
       ScrollTrigger.refresh();
     };
 
-    if (video.readyState >= 1) createScrubTimeline();
-    else video.addEventListener('loadedmetadata', createScrubTimeline, { once: true });
+    createScrubTimeline();
+    video.addEventListener('loadedmetadata', createScrubTimeline);
+    bufferVideo.addEventListener('loadedmetadata', createScrubTimeline);
 
     return () => {
+      disposed = true;
       video.removeEventListener('loadedmetadata', createScrubTimeline);
+      bufferVideo.removeEventListener('loadedmetadata', createScrubTimeline);
       timelineRef.current = null;
       context?.revert();
     };
@@ -265,11 +240,10 @@ export function ScrollScene() {
       <section ref={stageRef} className="scrub-stage">
         <div ref={mediaRef} className="cinematic-media" aria-hidden="true">
           <img src="/quiet-place.jpg" alt="" className="cinematic-video" />
-          <canvas ref={canvasRef} className="cinematic-video cinematic-frame" />
           {!videoFailed ? (
             <video
               ref={videoRef}
-              className="cinematic-video scrub-video-source"
+              className="cinematic-video scrub-video-source is-active"
               muted
               playsInline
               preload="auto"
@@ -277,6 +251,21 @@ export function ScrollScene() {
               onPlay={(event) => event.currentTarget.pause()}
               onError={() => setVideoFailed(true)}
               data-testid="scroll-video"
+            >
+              <source src="/watermark-scroll-optimized.mp4" type="video/mp4" />
+            </video>
+          ) : null}
+          {!videoFailed ? (
+            <video
+              ref={bufferVideoRef}
+              className="cinematic-video scrub-video-source"
+              muted
+              playsInline
+              preload="auto"
+              poster="/quiet-place.jpg"
+              onPlay={(event) => event.currentTarget.pause()}
+              onError={() => setVideoFailed(true)}
+              aria-hidden="true"
             >
               <source src="/watermark-scroll-optimized.mp4" type="video/mp4" />
             </video>

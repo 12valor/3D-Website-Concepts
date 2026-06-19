@@ -31,19 +31,13 @@ code, pre { font-family: 'DM Mono', monospace; }
   backface-visibility: hidden;
   transform: translateZ(0);
 }
-.cinematic-frame {
-  z-index: 2;
-  display: block;
-  opacity: 0;
-  pointer-events: none;
-  contain: strict;
-}
-.cinematic-frame.is-ready { opacity: 1; }
 .scrub-video-source {
   z-index: 1;
   opacity: 0;
   pointer-events: none;
+  will-change: opacity;
 }
+.scrub-video-source.is-active { opacity: 1; }
 .cinematic-shade {
   position: absolute;
   inset: 0;
