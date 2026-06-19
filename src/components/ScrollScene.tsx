@@ -147,13 +147,11 @@ export function ScrollScene() {
             trigger: stage,
             start: 'top top',
             end: '+=700%',
-            scrub: reduceMotion ? 0.15 : 0.35,
+            scrub: true,
             pin: true,
             anticipatePin: 1,
             invalidateOnRefresh: true,
             onUpdate: (self) => {
-              video.pause();
-              bufferVideo.pause();
               const active = Math.min(chapters.length - 1, Math.floor(self.progress * chapters.length));
               if (active !== activeChapterRef.current) {
                 activeChapterRef.current = active;
@@ -248,7 +246,6 @@ export function ScrollScene() {
               playsInline
               preload="auto"
               poster="/quiet-place.jpg"
-              onPlay={(event) => event.currentTarget.pause()}
               onError={() => setVideoFailed(true)}
               data-testid="scroll-video"
             >
@@ -263,7 +260,6 @@ export function ScrollScene() {
               playsInline
               preload="auto"
               poster="/quiet-place.jpg"
-              onPlay={(event) => event.currentTarget.pause()}
               onError={() => setVideoFailed(true)}
               aria-hidden="true"
             >

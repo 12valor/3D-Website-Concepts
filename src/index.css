@@ -36,6 +36,7 @@ code, pre { font-family: 'DM Mono', monospace; }
   opacity: 0;
   pointer-events: none;
   will-change: opacity;
+  transition: opacity 50ms linear;
 }
 .scrub-video-source.is-active { opacity: 1; }
 .cinematic-shade {
