@@ -16,11 +16,7 @@ vi.mock('gsap', () => ({
 }));
 
 vi.mock('gsap/ScrollTrigger', () => ({
-  ScrollTrigger: {
-    create: vi.fn(),
-    refresh: vi.fn(),
-    update: vi.fn(),
-  },
+  ScrollTrigger: { create: vi.fn(), refresh: vi.fn(), update: vi.fn() },
 }));
 
 vi.mock('lenis', () => ({
@@ -31,17 +27,20 @@ vi.mock('lenis', () => ({
   },
 }));
 
-describe('The Last Quiet Place', () => {
-  it('renders the complete scroll story and controls', () => {
+describe('snoopy package experience', () => {
+  it('renders package sections and a non-autoplaying scroll video', () => {
     render(<App />);
 
-    expect(screen.getByRole('heading', { name: /the last\s*quiet place/i })).toBeInTheDocument();
-    expect(screen.getByText(/we keep moving/i)).toBeInTheDocument();
-    expect(screen.getByText(/above all of it/i)).toBeInTheDocument();
-    expect(screen.getByText(/not everything/i)).toBeInTheDocument();
-    expect(screen.getByText(/stay for a while/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /begin the journey/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /restart/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /sound is off/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /run a quiet place from your browser/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /the video only moves when you do/i })).toBeInTheDocument();
+    expect(screen.getByText(/snoopy dashboard/i)).toBeInTheDocument();
+    expect(screen.getByText('snoopy-sunset')).toBeInTheDocument();
+    expect(screen.getByText('npx snoopy --breathe')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Start Session', exact: true })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Restart Session', exact: true })).toBeInTheDocument();
+
+    const video = screen.getByTestId('scroll-video');
+    expect(video).not.toHaveAttribute('autoplay');
+    expect(video).not.toHaveAttribute('loop');
   });
 });
