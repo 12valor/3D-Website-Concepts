@@ -6,13 +6,6 @@ import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(useGSAP, ScrollTrigger);
@@ -73,42 +66,31 @@ export default function MascotHero() {
         <nav
           ref={navRef}
           aria-label="Primary navigation"
-          className="mx-auto flex h-14 w-full max-w-4xl items-center justify-between rounded-full border border-white/70 bg-white/48 px-2.5 shadow-[0_18px_50px_rgba(8,91,153,0.18),inset_0_1px_0_rgba(255,255,255,0.72)] backdrop-blur-2xl sm:h-16 sm:px-4 opacity-0"
+          className="mx-auto flex h-12 w-full max-w-4xl items-center justify-between rounded-full bg-white/60 px-3 sm:h-14 sm:px-4 opacity-0"
         >
           <Link
             href="#home"
-            className="group flex items-center gap-2 rounded-full px-2.5 py-2 text-sm font-extrabold text-[#082033] transition hover:text-sky-700 sm:text-base"
+            className="rounded-full px-3 py-2 text-sm font-extrabold text-[#082033] transition hover:text-sky-700 sm:text-base"
             aria-label="Snoopy Blue home"
           >
-            <span className="relative grid size-8 place-items-center rounded-full bg-white/80 shadow-inner ring-1 ring-sky-200/80 sm:size-9">
-              <span className="absolute left-2.5 top-2 size-1.5 rounded-full bg-sky-500 sm:left-3 sm:top-2.5" />
-              <span className="absolute right-2.5 top-2 size-1.5 rounded-full bg-[#082033] sm:right-3 sm:top-2.5" />
-              <span className="mt-2 h-2 w-3.5 rounded-b-full border-b-2 border-[#082033]" />
-            </span>
-            <span>Snoopy Blue Soap</span>
+            Snoopy Blue
           </Link>
 
-          <NavigationMenu className="hidden md:flex rounded-full bg-white/24 p-1">
-            <NavigationMenuList className="space-x-1">
-              {navItems.map((item) => (
-                <NavigationMenuItem key={item.label}>
-                  {/* @ts-expect-error asChild is a valid Radix prop but might be missing from the local type definition */}
-                  <NavigationMenuLink asChild>
-                    <Link
-                      href={item.href}
-                      className={`${navigationMenuTriggerStyle()} h-9 rounded-full bg-transparent px-4 py-2 text-sm font-semibold text-[#123a55] hover:bg-white/70 hover:text-sky-800 focus:bg-white/70 focus:text-sky-800`}
-                    >
-                      {item.label}
-                    </Link>
-                  </NavigationMenuLink>
-                </NavigationMenuItem>
-              ))}
-            </NavigationMenuList>
-          </NavigationMenu>
+          <div className="hidden md:flex items-center gap-0.5">
+            {navItems.map((item) => (
+              <Link
+                key={item.label}
+                href={item.href}
+                className="rounded-full px-3 py-2 text-sm font-medium text-[#123a55] transition hover:bg-white/50 hover:text-sky-800"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
 
           <Link
             href="#products"
-            className="inline-flex h-auto items-center justify-center whitespace-nowrap rounded-full border border-sky-200 bg-white/88 px-5 py-2.5 text-sm font-bold text-[#045f94] shadow-[0_12px_28px_rgba(48,189,247,0.22)] transition hover:-translate-y-0.5 hover:bg-[#e6f7ff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-6"
+            className="rounded-full bg-white/70 px-4 py-2 text-xs font-bold text-[#045f94] transition hover:bg-white sm:text-sm"
           >
             Shop Now
           </Link>

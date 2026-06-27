@@ -72,39 +72,39 @@ function BenefitsSection() {
   const benefits = [
     {
       icon: Heart,
+      num: "01",
       title: "Gentle on Skin",
       desc: "Soft enough for sensitive skin. Made to cleanse without drying or irritation.",
-      color: "bg-[#30BDF7]",
     },
     {
       icon: Droplets,
+      num: "02",
       title: "Fresh Daily Scent",
       desc: "A light blue fragrance that stays fresh all day without being overpowering.",
-      color: "bg-[#45B5F5]",
     },
     {
       icon: Shield,
+      num: "03",
       title: "Handmade Quality",
       desc: "Each bar is carefully crafted in small batches for consistent quality and care.",
-      color: "bg-[#61C8FA]",
     },
     {
       icon: Leaf,
+      num: "04",
       title: "Clean Ingredients",
       desc: "No harsh chemicals. Just simple, skin-safe ingredients you can trust.",
-      color: "bg-[#45B5F5]",
     },
     {
       icon: Sparkles,
+      num: "05",
       title: "Moisturizing Formula",
       desc: "Leaves skin feeling soft and hydrated after every wash.",
-      color: "bg-[#30BDF7]",
     },
     {
       icon: Gift,
+      num: "06",
       title: "Perfect for Gifting",
       desc: "Cute packaging and a lovable mascot make it a ready-to-give gift.",
-      color: "bg-[#61C8FA]",
     },
   ];
 
@@ -136,7 +136,6 @@ function BenefitsSection() {
       id="benefits"
       className="relative z-10 bg-[#f4fbff] px-5 py-20 sm:px-8 sm:py-24 md:px-10 md:py-32 overflow-hidden"
     >
-      {/* Background decorative bubbles */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -right-12 top-20 h-40 w-40 rounded-full border border-[#30BDF7]/10" />
         <div className="absolute -left-10 bottom-32 h-32 w-32 rounded-full border border-[#30BDF7]/8" />
@@ -156,29 +155,31 @@ function BenefitsSection() {
           </p>
         </FadeIn>
 
-        <div ref={container} className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6">
+        <div ref={container} className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8 lg:grid-cols-3 lg:gap-10">
           {benefits.map((b, i) => (
             <div
               key={i}
               data-bento-card
-              className={`group relative overflow-hidden rounded-[20px] ${b.color} min-h-[220px] p-6 transition-transform duration-200 hover:scale-[1.02] sm:p-7 md:rounded-[28px] md:min-h-[250px] lg:p-8`}
+              className="group relative rounded-[20px] bg-[#eaf4ff] p-7 pt-14 transition-transform duration-200 hover:scale-[1.02] sm:p-8 sm:pt-16 md:rounded-[24px]"
             >
-              {/* Decorative bubble */}
-              <div className="pointer-events-none absolute -right-4 -top-4 h-24 w-24 rounded-full border-2 border-white/15" />
-              <div className="pointer-events-none absolute bottom-8 right-6 h-14 w-14 rounded-full border-2 border-white/10" />
+              {/* Faded number */}
+              <span className="pointer-events-none absolute right-4 top-2 text-[100px] font-black leading-none text-[#30BDF7]/8 select-none sm:right-6 sm:text-[120px]">
+                {b.num}
+              </span>
 
-              <div className="relative z-10 flex h-full flex-col justify-end">
-                <div className="mb-auto rounded-[14px] bg-white/20 p-2.5 sm:p-3">
-                  <b.icon className="size-6 text-white sm:size-7" strokeWidth={2} />
-                </div>
-                <div className="mt-6">
-                  <h3 className="mb-1.5 text-xl font-bold text-white sm:text-2xl">
-                    {b.title}
-                  </h3>
-                  <p className="text-sm font-medium leading-snug text-white/85 sm:text-base">
-                    {b.desc}
-                  </p>
-                </div>
+              {/* Icon badge */}
+              <div className="absolute -top-3.5 left-5 flex size-12 items-center justify-center rounded-full bg-[#30BDF7] shadow-md sm:left-7 sm:size-14">
+                <b.icon className="size-5 text-white sm:size-6" strokeWidth={2.5} />
+              </div>
+
+              {/* Content */}
+              <div className="relative z-10">
+                <h3 className="mb-2 text-lg font-bold text-[#082033] sm:text-xl">
+                  {b.title}
+                </h3>
+                <p className="text-sm font-medium leading-relaxed text-[#31566d] sm:text-base">
+                  {b.desc}
+                </p>
               </div>
             </div>
           ))}
