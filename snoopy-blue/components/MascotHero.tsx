@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -56,25 +55,25 @@ export default function MascotHero() {
             <NavigationMenuList className="space-x-1">
               {navItems.map((item) => (
                 <NavigationMenuItem key={item.label}>
-                  <Link href={item.href} legacyBehavior passHref>
-                    <NavigationMenuLink
+                  <NavigationMenuLink asChild>
+                    <Link
+                      href={item.href}
                       className={`${navigationMenuTriggerStyle()} h-9 rounded-full bg-transparent px-4 py-2 text-sm font-semibold text-[#123a55] hover:bg-white/70 hover:text-sky-800 focus:bg-white/70 focus:text-sky-800`}
                     >
                       {item.label}
-                    </NavigationMenuLink>
-                  </Link>
+                    </Link>
+                  </NavigationMenuLink>
                 </NavigationMenuItem>
               ))}
             </NavigationMenuList>
           </NavigationMenu>
 
-          <Button
-            asChild
-            variant="outline"
-            className="h-auto rounded-full border-sky-200 bg-white/88 px-5 py-2.5 text-sm font-bold text-[#045f94] shadow-[0_12px_28px_rgba(48,189,247,0.22)] transition hover:-translate-y-0.5 hover:bg-[#e6f7ff] sm:px-6"
+          <Link
+            href="#products"
+            className="inline-flex h-auto items-center justify-center whitespace-nowrap rounded-full border border-sky-200 bg-white/88 px-5 py-2.5 text-sm font-bold text-[#045f94] shadow-[0_12px_28px_rgba(48,189,247,0.22)] transition hover:-translate-y-0.5 hover:bg-[#e6f7ff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-6"
           >
-            <Link href="#products">Shop Now</Link>
-          </Button>
+            Shop Now
+          </Link>
         </nav>
       </header>
 
@@ -95,19 +94,18 @@ export default function MascotHero() {
           Soft, refreshing, and skin-friendly soaps made for everyday use with a playful blue brand identity.
         </p>
         <div className="flex flex-col items-center gap-4 sm:flex-row">
-          <Button
-            asChild
-            className="h-auto rounded-full bg-white px-8 py-3.5 text-sm font-bold uppercase tracking-widest text-[#045f94] shadow-lg transition hover:-translate-y-0.5 hover:bg-[#e6f7ff] sm:px-10 sm:py-4 sm:text-base"
+          <Link
+            href="#products"
+            className="inline-flex h-auto items-center justify-center whitespace-nowrap rounded-full bg-white px-8 py-3.5 text-sm font-bold uppercase tracking-widest text-[#045f94] shadow-lg transition hover:-translate-y-0.5 hover:bg-[#e6f7ff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-10 sm:py-4 sm:text-base"
           >
-            <Link href="#products">Shop Soap</Link>
-          </Button>
-          <Button
-            asChild
-            variant="outline"
-            className="h-auto rounded-full border-2 border-white/80 bg-transparent px-8 py-3.5 text-sm font-bold uppercase tracking-widest text-white shadow-lg backdrop-blur-sm transition hover:-translate-y-0.5 hover:bg-white/20 sm:px-10 sm:py-4 sm:text-base"
+            Shop Soap
+          </Link>
+          <Link
+            href="#products"
+            className="inline-flex h-auto items-center justify-center whitespace-nowrap rounded-full border-2 border-white/80 bg-transparent px-8 py-3.5 text-sm font-bold uppercase tracking-widest text-white shadow-lg backdrop-blur-sm transition hover:-translate-y-0.5 hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-10 sm:py-4 sm:text-base"
           >
-            <Link href="#products">View Collection</Link>
-          </Button>
+            View Collection
+          </Link>
         </div>
       </div>
 

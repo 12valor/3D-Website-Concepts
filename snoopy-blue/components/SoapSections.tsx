@@ -212,19 +212,18 @@ function CTASection() {
             Explore the Snoopy Blue Soap collection and find your new everyday favorite.
           </p>
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Button
-              asChild
-              className="h-auto w-full rounded-full bg-white px-8 py-3.5 text-sm font-bold uppercase tracking-widest text-[#045f94] transition hover:-translate-y-0.5 hover:bg-[#e6f7ff] sm:w-auto md:px-10 md:py-4 md:text-base"
+            <Link
+              href="#products"
+              className="inline-flex h-auto w-full items-center justify-center whitespace-nowrap rounded-full bg-white px-8 py-3.5 text-sm font-bold uppercase tracking-widest text-[#045f94] transition hover:-translate-y-0.5 hover:bg-[#e6f7ff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-auto md:px-10 md:py-4 md:text-base"
             >
-              <Link href="#products">Shop Collection</Link>
-            </Button>
-            <Button
-              asChild
-              variant="outline"
-              className="h-auto w-full rounded-full border-2 border-white bg-transparent px-8 py-3.5 text-sm font-bold uppercase tracking-widest text-white transition hover:-translate-y-0.5 hover:bg-white hover:text-[#045f94] sm:w-auto md:px-10 md:py-4 md:text-base"
+              Shop Collection
+            </Link>
+            <Link
+              href="mailto:hello@snoopyblue.com"
+              className="inline-flex h-auto w-full items-center justify-center whitespace-nowrap rounded-full border-2 border-white bg-transparent px-8 py-3.5 text-sm font-bold uppercase tracking-widest text-white transition hover:-translate-y-0.5 hover:bg-white hover:text-[#045f94] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-auto md:px-10 md:py-4 md:text-base"
             >
-              <Link href="mailto:hello@snoopyblue.com">Contact Us</Link>
-            </Button>
+              Contact Us
+            </Link>
           </div>
         </FadeIn>
       </div>
