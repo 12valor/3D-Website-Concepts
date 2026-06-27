@@ -7,6 +7,14 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Heart,
+  Droplets,
+  Sparkles,
+  Gift,
+  Shield,
+  Leaf,
+} from "lucide-react";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(useGSAP, ScrollTrigger);
@@ -58,74 +66,121 @@ function FadeIn({
   );
 }
 
-function BentoCard({
-  className = "",
-  index = 0,
-  title,
-}: {
-  className?: string;
-  index: number;
-  title: string;
-}) {
+function BenefitsSection() {
   const container = useRef<HTMLDivElement>(null);
+
+  const benefits = [
+    {
+      icon: Heart,
+      title: "Gentle on Skin",
+      desc: "Soft enough for sensitive skin. Made to cleanse without drying or irritation.",
+      color: "bg-[#30BDF7]",
+    },
+    {
+      icon: Droplets,
+      title: "Fresh Daily Scent",
+      desc: "A light blue fragrance that stays fresh all day without being overpowering.",
+      color: "bg-[#45B5F5]",
+    },
+    {
+      icon: Shield,
+      title: "Handmade Quality",
+      desc: "Each bar is carefully crafted in small batches for consistent quality and care.",
+      color: "bg-[#61C8FA]",
+    },
+    {
+      icon: Leaf,
+      title: "Clean Ingredients",
+      desc: "No harsh chemicals. Just simple, skin-safe ingredients you can trust.",
+      color: "bg-[#45B5F5]",
+    },
+    {
+      icon: Sparkles,
+      title: "Moisturizing Formula",
+      desc: "Leaves skin feeling soft and hydrated after every wash.",
+      color: "bg-[#30BDF7]",
+    },
+    {
+      icon: Gift,
+      title: "Perfect for Gifting",
+      desc: "Cute packaging and a lovable mascot make it a ready-to-give gift.",
+      color: "bg-[#61C8FA]",
+    },
+  ];
 
   useGSAP(() => {
     if (!container.current) return;
 
+    const cards = container.current.querySelectorAll("[data-bento-card]");
+
     gsap.fromTo(
-      container.current,
-      { scaleY: 0, opacity: 0 },
+      cards,
+      { y: 40, opacity: 0 },
       {
-        scaleY: 1,
+        y: 0,
         opacity: 1,
-        duration: 0.75,
-        delay: index * 0.08,
+        duration: 0.6,
+        stagger: 0.08,
         ease: "power3.out",
         scrollTrigger: {
           trigger: container.current,
-          start: "top 90%",
-          toggleActions: "play none none reset",
+          start: "top 82%",
+          toggleActions: "play none none none",
         },
       }
     );
   }, { scope: container });
 
   return (
-    <div ref={container} className={className} style={{ transformOrigin: "bottom" }}>
-      <Card className="flex h-full w-full items-center justify-center rounded-[16px] border-none bg-[#45B5F5] shadow-none md:rounded-[24px]">
-        <CardContent className="p-6 text-center text-xl font-bold text-white sm:text-2xl">
-          {title}
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
-
-function BenefitsSection() {
-  const benefits = [
-    { title: "Gentle on Skin", className: "lg:col-start-1 lg:col-span-3 lg:row-start-1 lg:row-span-1 md:col-span-1 md:row-span-1" },
-    { title: "Fresh Daily Scent", className: "lg:col-start-1 lg:col-span-3 lg:row-start-2 lg:row-span-1 md:col-span-1 md:row-span-1" },
-    { title: "Handmade Quality", className: "lg:col-start-4 lg:col-span-3 lg:row-start-1 lg:row-span-2 md:col-span-1 md:row-span-2" },
-    { title: "Moisturizing Formula", className: "lg:col-start-7 lg:col-span-6 lg:row-start-1 lg:row-span-1 md:col-span-2 md:row-span-1" },
-    { title: "Clean Ingredients", className: "lg:col-start-7 lg:col-span-3 lg:row-start-2 lg:row-span-1 md:col-span-1 md:row-span-1" },
-    { title: "Perfect for Gifting", className: "lg:col-start-10 lg:col-span-3 lg:row-start-2 lg:row-span-1 md:col-span-1 md:row-span-1" },
-  ];
-
-  return (
     <section
       id="benefits"
-      className="relative z-10 bg-[#f4fbff] px-5 py-20 sm:px-8 sm:py-24 md:px-10 md:py-32"
+      className="relative z-10 bg-[#f4fbff] px-5 py-20 sm:px-8 sm:py-24 md:px-10 md:py-32 overflow-hidden"
     >
-      <FadeIn>
-        <h2 className="mb-14 text-center text-[clamp(2.5rem,8vw,80px)] leading-none font-black uppercase text-[#045f94] sm:mb-20">
-          Soap Benefits
-        </h2>
-      </FadeIn>
+      {/* Background decorative bubbles */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -right-12 top-20 h-40 w-40 rounded-full border border-[#30BDF7]/10" />
+        <div className="absolute -left-10 bottom-32 h-32 w-32 rounded-full border border-[#30BDF7]/8" />
+        <div className="absolute right-1/4 bottom-16 h-24 w-24 rounded-full border border-[#30BDF7]/8" />
+      </div>
 
-      <div className="mx-auto max-w-[1400px]">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 auto-rows-[200px] md:auto-rows-[240px] lg:auto-rows-[280px] gap-4 md:gap-6 lg:gap-8 md:grid-flow-row-dense">
-          {benefits.map((benefit, index) => (
-            <BentoCard key={index} index={index} title={benefit.title} className={benefit.className} />
+      <div className="relative mx-auto max-w-[1280px]">
+        <FadeIn>
+          <p className="mb-3 text-center text-xs font-black uppercase tracking-widest text-[#30BDF7] sm:text-sm">
+            Why choose us
+          </p>
+          <h2 className="mb-4 text-center text-[clamp(2rem,5vw,56px)] leading-none font-black text-[#045f94]">
+            Soap Benefits
+          </h2>
+          <p className="mx-auto mb-14 max-w-xl text-center text-base font-medium text-[#31566d] sm:mb-20 sm:text-lg">
+            Every bar of Snoopy Blue Soap is designed to bring freshness, gentleness, and a little joy to your daily routine.
+          </p>
+        </FadeIn>
+
+        <div ref={container} className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6">
+          {benefits.map((b, i) => (
+            <div
+              key={i}
+              data-bento-card
+              className={`group relative overflow-hidden rounded-[20px] ${b.color} min-h-[220px] p-6 transition-transform duration-200 hover:scale-[1.02] sm:p-7 md:rounded-[28px] md:min-h-[250px] lg:p-8`}
+            >
+              {/* Decorative bubble */}
+              <div className="pointer-events-none absolute -right-4 -top-4 h-24 w-24 rounded-full border-2 border-white/15" />
+              <div className="pointer-events-none absolute bottom-8 right-6 h-14 w-14 rounded-full border-2 border-white/10" />
+
+              <div className="relative z-10 flex h-full flex-col justify-end">
+                <div className="mb-auto rounded-[14px] bg-white/20 p-2.5 sm:p-3">
+                  <b.icon className="size-6 text-white sm:size-7" strokeWidth={2} />
+                </div>
+                <div className="mt-6">
+                  <h3 className="mb-1.5 text-xl font-bold text-white sm:text-2xl">
+                    {b.title}
+                  </h3>
+                  <p className="text-sm font-medium leading-snug text-white/85 sm:text-base">
+                    {b.desc}
+                  </p>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       </div>
