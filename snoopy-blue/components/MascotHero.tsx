@@ -1,3 +1,9 @@
+"use client";
+
+import { useRef } from "react";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -8,6 +14,10 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(useGSAP, ScrollTrigger);
+}
+
 const navItems = [
   { label: "Home", href: "#home" },
   { label: "Benefits", href: "#benefits" },
@@ -17,9 +27,36 @@ const navItems = [
 ];
 
 export default function MascotHero() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const navRef = useRef<HTMLElement>(null);
+  const mascotRef = useRef<HTMLDivElement>(null);
+
+  useGSAP(() => {
+    if (!sectionRef.current) return;
+
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: sectionRef.current,
+        start: "top 80%",
+        toggleActions: "play none none reset",
+      }
+    });
+
+    tl.fromTo(navRef.current, 
+      { opacity: 0, y: 24 }, 
+      { opacity: 1, y: 0, duration: 1.1, ease: "power3.out" }
+    )
+    .fromTo(mascotRef.current,
+      { opacity: 0, y: 18, scale: 0.98 },
+      { opacity: 1, y: 0, scale: 1, duration: 0.9, ease: "power3.out" },
+      "<0.2"
+    );
+  }, { scope: sectionRef });
+
   return (
     <section
       id="home"
+      ref={sectionRef}
       aria-label="Snoopy Blue landing hero"
       className="relative isolate flex min-h-screen h-[100dvh] w-full overflow-hidden bg-[#30bdf7] text-[#082033]"
     >
@@ -32,11 +69,11 @@ export default function MascotHero() {
         className="-z-30 object-cover"
       />
 
-
       <header className="absolute inset-x-0 top-0 z-30 px-4 pt-4 sm:px-6 sm:pt-6 lg:pt-8">
         <nav
+          ref={navRef}
           aria-label="Primary navigation"
-          className="hero-enter-soft mx-auto flex h-14 w-full max-w-4xl items-center justify-between rounded-full border border-white/70 bg-white/48 px-2.5 shadow-[0_18px_50px_rgba(8,91,153,0.18),inset_0_1px_0_rgba(255,255,255,0.72)] backdrop-blur-2xl sm:h-16 sm:px-4"
+          className="mx-auto flex h-14 w-full max-w-4xl items-center justify-between rounded-full border border-white/70 bg-white/48 px-2.5 shadow-[0_18px_50px_rgba(8,91,153,0.18),inset_0_1px_0_rgba(255,255,255,0.72)] backdrop-blur-2xl sm:h-16 sm:px-4 opacity-0"
         >
           <Link
             href="#home"
@@ -77,40 +114,10 @@ export default function MascotHero() {
         </nav>
       </header>
 
-      {/* Floating Bubbles */}
-      <div className="hero-enter absolute left-[15%] top-[25%] z-20 size-8 rounded-full border border-white/40 bg-white/10 shadow-sm backdrop-blur-sm sm:size-12" />
-      <div className="hero-enter absolute right-[20%] top-[30%] z-20 size-12 rounded-full border border-white/40 bg-white/10 shadow-sm backdrop-blur-sm sm:size-16" style={{ animationDelay: "150ms" }} />
-      <div className="hero-enter absolute left-[30%] top-[45%] z-20 size-6 rounded-full border border-white/40 bg-white/10 shadow-sm backdrop-blur-sm sm:size-8" style={{ animationDelay: "300ms" }} />
-      <div className="hero-enter absolute right-[25%] top-[50%] z-20 size-10 rounded-full border border-white/40 bg-white/10 shadow-sm backdrop-blur-sm sm:size-14" style={{ animationDelay: "450ms" }} />
 
-      <div className="hero-enter relative z-20 mx-auto mt-[16vh] flex max-w-4xl flex-col items-center justify-center px-4 text-center sm:mt-[20vh]">
-        <span className="mb-4 inline-block rounded-full bg-white/20 px-4 py-1.5 text-xs font-bold tracking-widest text-white shadow-sm backdrop-blur-md sm:text-sm">
-          GENTLE HANDMADE SOAP
-        </span>
-        <h1 className="mb-6 max-w-3xl text-[clamp(2.5rem,6vw,5.5rem)] leading-[1.1] font-black text-white drop-shadow-md">
-          Fresh skin starts with a clean little ritual.
-        </h1>
-        <p className="mb-8 max-w-2xl text-lg font-medium text-white/90 drop-shadow sm:text-xl">
-          Soft, refreshing, and skin-friendly soaps made for everyday use with a playful blue brand identity.
-        </p>
-        <div className="flex flex-col items-center gap-4 sm:flex-row">
-          <Link
-            href="#products"
-            className="inline-flex h-auto items-center justify-center whitespace-nowrap rounded-full bg-white px-8 py-3.5 text-sm font-bold uppercase tracking-widest text-[#045f94] shadow-lg transition hover:-translate-y-0.5 hover:bg-[#e6f7ff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-10 sm:py-4 sm:text-base"
-          >
-            Shop Soap
-          </Link>
-          <Link
-            href="#products"
-            className="inline-flex h-auto items-center justify-center whitespace-nowrap rounded-full border-2 border-white/80 bg-transparent px-8 py-3.5 text-sm font-bold uppercase tracking-widest text-white shadow-lg backdrop-blur-sm transition hover:-translate-y-0.5 hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-10 sm:py-4 sm:text-base"
-          >
-            View Collection
-          </Link>
-        </div>
-      </div>
 
       <div className="pointer-events-none absolute inset-x-0 bottom-[3svh] top-[7svh] z-10 mx-auto flex max-w-[1500px] items-end justify-center px-0 sm:bottom-[2svh] sm:top-[7svh] lg:bottom-[0svh] lg:top-[8svh]">
-        <div className="hero-enter relative aspect-[16/9] w-[250vw] max-w-none shrink-0 sm:w-[118vw] lg:w-[105vw] xl:w-[96vw] 2xl:w-[88vw]">
+        <div ref={mascotRef} className="relative aspect-[16/9] w-[250vw] max-w-none shrink-0 sm:w-[118vw] lg:w-[105vw] xl:w-[96vw] 2xl:w-[88vw] opacity-0">
           <Image
             src="/mascot.png"
             alt="Glossy Snoopy Blue mascot"

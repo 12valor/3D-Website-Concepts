@@ -1,19 +1,18 @@
 import type { Metadata } from "next";
-import { Geist_Mono, Kanit, Geist } from "next/font/google";
+import { Baloo_2, Nunito_Sans } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
-
-const kanit = Kanit({
-  variable: "--font-kanit",
+const baloo = Baloo_2({
+  variable: "--font-heading",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  weight: ["600", "700", "800"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const nunito = Nunito_Sans({
+  variable: "--font-body",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -29,7 +28,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn("h-full", "antialiased", kanit.variable, geistMono.variable, "font-sans", geist.variable)}
+      className={cn("h-full", "antialiased", baloo.variable, nunito.variable, "font-sans")}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

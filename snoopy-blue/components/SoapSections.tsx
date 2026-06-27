@@ -1,9 +1,16 @@
 "use client";
 
-import { motion } from "motion/react";
+import { useRef } from "react";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(useGSAP, ScrollTrigger);
+}
 
 function FadeIn({
   children,
@@ -20,16 +27,34 @@ function FadeIn({
   y?: number;
   className?: string;
 }) {
+  const container = useRef<HTMLDivElement>(null);
+
+  useGSAP(() => {
+    if (!container.current) return;
+    
+    gsap.fromTo(
+      container.current,
+      { opacity: 0, x, y },
+      {
+        opacity: 1,
+        x: 0,
+        y: 0,
+        duration,
+        delay,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: container.current,
+          start: "top 85%",
+          toggleActions: "play none none reset",
+        },
+      }
+    );
+  }, { scope: container });
+
   return (
-    <motion.div
-      className={className}
-      initial={{ opacity: 0, x, y }}
-      whileInView={{ opacity: 1, x: 0, y: 0 }}
-      viewport={{ once: true, margin: "50px", amount: 0 }}
-      transition={{ duration, delay, ease: [0.25, 0.1, 0.25, 1] }}
-    >
+    <div ref={container} className={className}>
       {children}
-    </motion.div>
+    </div>
   );
 }
 
@@ -42,25 +67,37 @@ function BentoCard({
   index: number;
   title: string;
 }) {
-  return (
-    <motion.div
-      initial={{ scaleY: 0, opacity: 0 }}
-      whileInView={{ scaleY: 1, opacity: 1 }}
-      viewport={{ once: true, margin: "50px" }}
-      transition={{
+  const container = useRef<HTMLDivElement>(null);
+
+  useGSAP(() => {
+    if (!container.current) return;
+
+    gsap.fromTo(
+      container.current,
+      { scaleY: 0, opacity: 0 },
+      {
+        scaleY: 1,
+        opacity: 1,
         duration: 0.75,
-        ease: [0.16, 1, 0.3, 1],
         delay: index * 0.08,
-      }}
-      style={{ transformOrigin: "bottom" }}
-      className={className}
-    >
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: container.current,
+          start: "top 90%",
+          toggleActions: "play none none reset",
+        },
+      }
+    );
+  }, { scope: container });
+
+  return (
+    <div ref={container} className={className} style={{ transformOrigin: "bottom" }}>
       <Card className="flex h-full w-full items-center justify-center rounded-[16px] border-none bg-[#45B5F5] shadow-none md:rounded-[24px]">
         <CardContent className="p-6 text-center text-xl font-bold text-white sm:text-2xl">
           {title}
         </CardContent>
       </Card>
-    </motion.div>
+    </div>
   );
 }
 
