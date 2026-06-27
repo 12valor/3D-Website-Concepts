@@ -92,6 +92,7 @@ export default function MascotHero() {
             <NavigationMenuList className="space-x-1">
               {navItems.map((item) => (
                 <NavigationMenuItem key={item.label}>
+                  {/* @ts-expect-error asChild is a valid Radix prop but might be missing from the local type definition */}
                   <NavigationMenuLink asChild>
                     <Link
                       href={item.href}

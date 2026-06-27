@@ -114,7 +114,7 @@ function BenefitsSection() {
   return (
     <section
       id="benefits"
-      className="relative z-10 -mt-10 rounded-t-[40px] bg-white px-5 py-20 sm:-mt-12 sm:rounded-t-[50px] sm:px-8 sm:py-24 md:-mt-14 md:rounded-t-[60px] md:px-10 md:py-32"
+      className="relative z-10 bg-[#f4fbff] px-5 py-20 sm:px-8 sm:py-24 md:px-10 md:py-32"
     >
       <FadeIn>
         <h2 className="mb-14 text-center text-[clamp(2.5rem,8vw,80px)] leading-none font-black uppercase text-[#045f94] sm:mb-20">
