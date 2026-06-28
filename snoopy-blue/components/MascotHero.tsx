@@ -4,6 +4,7 @@ import { useRef } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Image from "next/image";
 import { Droplets, Sparkles, Shield, Heart, Gift, Leaf, Star, Sun } from "lucide-react";
 
 if (typeof window !== "undefined") {
@@ -22,9 +23,9 @@ const tags = [
 ];
 
 const marqueeImages = [
-  { bg: "bg-[#b3e5fc]", label: "Bar Soap" },
-  { bg: "bg-[#e1f5fe]", label: "Liquid Soap" },
-  { bg: "bg-[#81d4fa]", label: "Gift Set" },
+  { src: "/images/bar-soap-1.jpg", label: "Bar Soap" },
+  { src: "/images/liquid-soap.jpg", label: "Liquid Soap" },
+  { src: "/images/gift-set.jpg", label: "Gift Set" },
 ];
 
 export default function MascotHero() {
@@ -111,10 +112,17 @@ export default function MascotHero() {
               {[...marqueeImages, ...marqueeImages, ...marqueeImages].map((img, i) => (
                 <div
                   key={i}
-                  className={`relative h-40 w-60 shrink-0 rounded-2xl ${img.bg} sm:h-48 sm:w-72 md:h-56 md:w-80`}
+                  className="relative h-40 w-60 shrink-0 overflow-hidden rounded-2xl sm:h-48 sm:w-72 md:h-56 md:w-80"
                 >
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-sm font-bold text-[#045f94]/60">{img.label}</span>
+                  <Image
+                    src={img.src}
+                    alt={img.label}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 640px) 240px, (max-width: 768px) 288px, 320px"
+                  />
+                  <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/30 to-transparent p-3">
+                    <span className="text-sm font-bold text-white">{img.label}</span>
                   </div>
                 </div>
               ))}

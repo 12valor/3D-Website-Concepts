@@ -79,26 +79,33 @@ export default function HowItWorks() {
             <div
               key={i}
               data-step-card
-              className="group relative rounded-[20px] bg-[#eaf4ff] p-7 sm:p-8 md:rounded-[24px]"
+              className="group relative"
             >
-              {/* Faded number */}
-              <span className="pointer-events-none absolute right-4 top-2 text-[100px] font-black leading-none text-[#30BDF7]/8 select-none sm:right-6 sm:text-[120px]">
-                {step.num}
-              </span>
+              <div className="rounded-[20px] bg-[#eaf4ff] p-7 pb-8 pt-16 sm:p-8 sm:pt-18 md:rounded-[24px]">
+                {/* Faded number */}
+                <span className="pointer-events-none absolute right-4 top-2 text-[100px] font-black leading-none text-[#30BDF7]/8 select-none sm:right-6 sm:text-[120px]">
+                  {step.num}
+                </span>
 
-              {/* Icon badge */}
-              <div className={`absolute -top-3.5 left-5 flex size-12 items-center justify-center rounded-full ${step.variant} shadow-md sm:left-7 sm:size-14`}>
-                <step.icon className="size-5 text-white sm:size-6" strokeWidth={2.5} />
+                {/* Content */}
+                <div className="relative z-10">
+                  <h3 className="mb-2 text-lg font-bold text-[#082033] sm:text-xl">
+                    {step.title}
+                  </h3>
+                  <p className="text-sm font-medium leading-relaxed text-[#31566d] sm:text-base">
+                    {step.desc}
+                  </p>
+                </div>
               </div>
 
-              {/* Content */}
-              <div className="relative z-10 pt-4">
-                <h3 className="mb-2 text-lg font-bold text-[#082033] sm:text-xl">
-                  {step.title}
-                </h3>
-                <p className="text-sm font-medium leading-relaxed text-[#31566d] sm:text-base">
-                  {step.desc}
-                </p>
+              {/* Icon badge with curved notch */}
+              <div className="absolute -top-3.5 left-5 z-20 sm:left-7">
+                {/* Curved notch background - matches card bg */}
+                <div className="absolute -left-3 -top-3 size-[52px] rounded-full bg-[#eaf4ff] sm:-left-4 sm:-top-4 sm:size-[60px]" />
+                {/* Icon circle */}
+                <div className={`relative flex size-12 items-center justify-center rounded-full ${step.variant} shadow-md sm:size-14`}>
+                  <step.icon className="size-5 text-white sm:size-6" strokeWidth={2.5} />
+                </div>
               </div>
             </div>
           ))}

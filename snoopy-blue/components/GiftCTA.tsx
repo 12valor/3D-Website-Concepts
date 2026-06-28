@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Link from "next/link";
+import Image from "next/image";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(useGSAP, ScrollTrigger);
@@ -39,8 +40,24 @@ export default function GiftCTA() {
         <div className="relative flex flex-col items-center gap-10 md:flex-row md:gap-16">
           {/* Left decorative images */}
           <div className="pointer-events-none absolute -left-8 top-0 hidden md:block">
-            <div className="mb-4 size-28 rounded-full bg-[#e6f7ff] sm:size-36" />
-            <div className="ml-8 size-20 rounded-full bg-[#b3e5fc] sm:size-24" />
+            <div className="relative mb-4 size-28 overflow-hidden rounded-full sm:size-36">
+              <Image
+                src="/images/cta-left-1.jpg"
+                alt=""
+                fill
+                className="object-cover"
+                sizes="144px"
+              />
+            </div>
+            <div className="relative ml-8 size-20 overflow-hidden rounded-full sm:size-24">
+              <Image
+                src="/images/cta-left-2.jpg"
+                alt=""
+                fill
+                className="object-cover"
+                sizes="96px"
+              />
+            </div>
           </div>
 
           {/* Center content */}
@@ -75,8 +92,24 @@ export default function GiftCTA() {
 
           {/* Right decorative images */}
           <div className="pointer-events-none absolute -right-8 bottom-0 hidden md:block">
-            <div className="mb-4 ml-auto size-24 rounded-full bg-[#b3e5fc] sm:size-32" />
-            <div className="size-16 rounded-full bg-[#e6f7ff] sm:size-20" />
+            <div className="relative mb-4 ml-auto size-24 overflow-hidden rounded-full sm:size-32">
+              <Image
+                src="/images/cta-right-1.jpg"
+                alt=""
+                fill
+                className="object-cover"
+                sizes="128px"
+              />
+            </div>
+            <div className="relative size-16 overflow-hidden rounded-full sm:size-20">
+              <Image
+                src="/images/cta-right-2.jpg"
+                alt=""
+                fill
+                className="object-cover"
+                sizes="80px"
+              />
+            </div>
           </div>
         </div>
       </div>
