@@ -48,8 +48,7 @@ video {
   transform: translateZ(0);
 }
 
-.scene-text,
-.scroll-content {
+.scene-text {
   will-change: transform, opacity;
 }
 

@@ -67,21 +67,21 @@ video {
 .cinematic-shade {
   z-index: 1;
   background:
-    linear-gradient(90deg, rgba(13, 8, 5, 0.82), rgba(13, 8, 5, 0.32) 55%, rgba(13, 8, 5, 0.54)),
-    linear-gradient(180deg, rgba(8, 5, 3, 0.42), transparent 38%, rgba(8, 5, 3, 0.76));
+    linear-gradient(90deg, rgba(13, 8, 5, 0.66), rgba(13, 8, 5, 0.22) 55%, rgba(13, 8, 5, 0.42)),
+    linear-gradient(180deg, rgba(8, 5, 3, 0.28), transparent 38%, rgba(8, 5, 3, 0.58));
 }
 
 .sunset-glow {
   z-index: 2;
   background: radial-gradient(circle at 68% 43%, rgba(255, 145, 54, 0.42), transparent 35%);
-  opacity: 0.13;
+  opacity: 0.16;
 }
 
 .foreground-layer {
   z-index: 3;
   background:
-    radial-gradient(ellipse at center, transparent 47%, rgba(9, 5, 3, 0.46) 100%),
-    linear-gradient(180deg, transparent 66%, rgba(7, 4, 2, 0.56));
+    radial-gradient(ellipse at center, transparent 47%, rgba(9, 5, 3, 0.28) 100%),
+    linear-gradient(180deg, transparent 66%, rgba(7, 4, 2, 0.38));
 }
 
 .site-header {
@@ -452,7 +452,7 @@ video {
   white-space: nowrap;
 }
 
-.scene--dashboard, .scene--variants { flex-direction: column; justify-content: center; min-height: 110svh; }
+.scene--dashboard, .scene--variants { flex-direction: column; justify-content: center; min-height: 100svh; }
 .scene--dashboard { isolation: isolate; }
 .scene-heading { position: relative; z-index: 2; margin-bottom: 1.25rem; }
 .scene-heading h2 { font-size: clamp(2.8rem, 5.2vw, 5.2rem); }

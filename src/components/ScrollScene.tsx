@@ -136,11 +136,10 @@ export function ScrollScene() {
 
       context = gsap.context(() => {
         const revealItems = gsap.utils.toArray<HTMLElement>('[data-scroll-reveal]');
-        gsap.set(revealItems, { autoAlpha: 0, y: 42 });
+        gsap.set(revealItems, { y: 28 });
 
         revealItems.forEach((item) => {
           gsap.to(item, {
-            autoAlpha: 1,
             y: 0,
             duration: 0.85,
             ease: 'power2.out',

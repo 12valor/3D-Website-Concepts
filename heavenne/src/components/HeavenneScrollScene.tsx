@@ -114,31 +114,23 @@ export function HeavenneScrollScene() {
 
     let context: gsap.Context | undefined;
     let initialized = false;
-    let pauseTimer = window.setTimeout(() => undefined, 0);
 
     video.pause();
 
     const pauseScrollVideo = () => {
-      window.clearTimeout(pauseTimer);
       video.pause();
     };
 
-    const playScrollVideo = () => {
-      window.clearTimeout(pauseTimer);
+    const syncVideoToScroll = (progress: number) => {
+      const duration = video.duration;
+      if (!Number.isFinite(duration) || duration <= 0) return;
 
-      if (video.ended || (video.duration && video.currentTime >= video.duration - 0.08)) {
-        video.currentTime = 0;
+      const safeProgress = Math.min(0.995, Math.max(0, progress));
+      const nextTime = safeProgress * duration;
+
+      if (Math.abs(video.currentTime - nextTime) > 0.04) {
+        video.currentTime = nextTime;
       }
-
-      if (video.paused) {
-        video.play().catch(() => {
-          video.pause();
-        });
-      }
-
-      pauseTimer = window.setTimeout(() => {
-        video.pause();
-      }, 220);
     };
 
     const updateChapterProgress = (progress: number) => {
@@ -198,7 +190,8 @@ export function HeavenneScrollScene() {
         onUpdate: (self: { progress: number }) => {
           textTimelineRef.current?.progress(self.progress);
           updateChapterProgress(self.progress);
-          playScrollVideo();
+          syncVideoToScroll(self.progress);
+          video.pause();
         },
         onLeave: pauseScrollVideo,
         onLeaveBack: () => {
@@ -219,7 +212,6 @@ export function HeavenneScrollScene() {
     }
 
     return () => {
-      window.clearTimeout(pauseTimer);
       video.pause();
       video.removeEventListener('loadedmetadata', setupScrollVideo);
       scrollTriggerRef.current?.kill();
@@ -256,7 +248,7 @@ export function HeavenneScrollScene() {
 
   return (
     <>
-      <section ref={rootRef} className="heavenne-story scroll-content relative min-h-[650vh] overflow-hidden bg-[#090b10]">
+      <section ref={rootRef} className="heavenne-story relative min-h-[650vh] overflow-hidden bg-[#090b10]">
         <div ref={pinRef} className="video-pin relative h-screen overflow-hidden bg-[#090b10]">
           <video
             ref={videoRef}
@@ -270,8 +262,8 @@ export function HeavenneScrollScene() {
             <source src="/videos/scroll-video.mp4" type="video/mp4" />
           </video>
 
-          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(4,6,10,.72)_0%,rgba(4,7,12,.34)_48%,rgba(4,7,12,.1)_72%,rgba(4,6,10,.52)_100%)]" />
-          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(4,6,10,.4)_0%,transparent_38%,rgba(5,7,12,.16)_64%,rgba(4,6,10,.78)_100%)]" />
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(4,6,10,.42)_0%,rgba(4,7,12,.2)_48%,rgba(4,7,12,.06)_72%,rgba(4,6,10,.32)_100%)]" />
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(4,6,10,.22)_0%,transparent_38%,rgba(5,7,12,.08)_64%,rgba(4,6,10,.48)_100%)]" />
           <div className="heavenne-glow pointer-events-none absolute inset-0 opacity-25" />
           <div className="heavenne-haze pointer-events-none absolute inset-0" />
           <div className="heavenne-vignette pointer-events-none absolute inset-0" />
