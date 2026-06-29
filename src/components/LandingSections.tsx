@@ -1,9 +1,6 @@
 import { useState } from 'react';
 import {
-  ArrowUpRight,
-  Check,
   ChevronDown,
-  Copy,
   Github,
   Heart,
   Mail,
@@ -12,8 +9,6 @@ import {
   Twitter,
 } from 'lucide-react';
 
-/* ─── data ─── */
-
 const faqs = [
   {
     question: 'What browsers does snoopy support?',
@@ -21,15 +16,15 @@ const faqs = [
   },
   {
     question: 'How does scroll-synced video seeking work?',
-    answer: 'snoopy maps your scroll position to the video timeline. When you scroll, it seeks the native video to the corresponding time. When you stop scrolling, the video holds on that exact moment. There is no normal autoplay during the pinned sequence.',
+    answer: 'snoopy maps your scroll position to the video timeline. When you scroll, it seeks the native video to the corresponding time. When you stop scrolling, the video holds on that exact moment. There is no normal autoplay during the scroll-controlled experience.',
   },
   {
     question: 'Can I use my own video files?',
-    answer: 'Yes. snoopy works with any MP4 file. For best results, encode with H.264 at 24–30fps with frequent keyframes (every 1–2 seconds). Long-GOP or high-resolution media may seek poorly.',
+    answer: 'Yes. snoopy works with any MP4 file. For best results, encode with H.264 at 24-30fps with frequent keyframes (every 1-2 seconds). Long-GOP or high-resolution media may seek poorly.',
   },
   {
     question: 'Does it work with React, Vue, and other frameworks?',
-    answer: 'snoopy is framework-agnostic — it works with vanilla JS, React, Vue, Svelte, Astro, and any other framework. Just pass it a video element reference.',
+    answer: 'snoopy is framework-agnostic, and it works with vanilla JS, React, Vue, Svelte, Astro, and any other framework. Just pass it a video element reference.',
   },
   {
     question: 'Is snoopy free to use?',
@@ -48,22 +43,12 @@ const footerLinks = {
   Legal: ['License (MIT)', 'Privacy', 'Terms'],
 };
 
-/* ─── component ─── */
 
 export function LandingSections() {
-  const [copiedText, setCopiedText] = useState<string | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-
-  const copyText = async (text: string) => {
-    await navigator.clipboard?.writeText(text);
-    setCopiedText(text);
-    window.setTimeout(() => setCopiedText(null), 1600);
-  };
 
   return (
     <div className="landing-sections">
-
-      {/* ─── FAQ ─── */}
       <section className="landing-section section-faq" id="faq">
         <div className="landing-container landing-container--narrow">
           <div className="section-header section-header--centered">
@@ -95,8 +80,6 @@ export function LandingSections() {
           </div>
         </div>
       </section>
-
-      {/* ─── Footer ─── */}
       <footer className="site-footer" id="footer">
         <div className="landing-container">
           <div className="footer-upper">
@@ -141,7 +124,7 @@ export function LandingSections() {
             </form>
           </div>
           <div className="footer-bottom">
-            <span>© 2026 snoopy. MIT License.</span>
+            <span>Copyright 2026 snoopy. MIT License.</span>
             <span>
               Made with <Heart size={12} fill="currentColor" strokeWidth={0} /> for quiet moments.
             </span>

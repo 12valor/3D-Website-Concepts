@@ -29,14 +29,32 @@ video {
 }
 
 .scene-text,
-.scroll-card,
-.scroll-content {
+.scroll-card {
   will-change: transform, opacity;
 }
 
-.quiet-story { min-height: 600vh; background: #160d08; }
-.scrub-stage { position: relative; height: 100svh; overflow: hidden; background: #160d08; }
-.cinematic-media { position: absolute; inset: 0; }
+.quiet-story {
+  position: relative;
+  z-index: 1;
+  min-height: auto;
+  background: transparent;
+}
+
+.cinematic-media,
+.cinematic-shade,
+.sunset-glow,
+.foreground-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.cinematic-media {
+  z-index: 0;
+  overflow: hidden;
+  background: #160d08;
+}
+
 .cinematic-video {
   position: absolute;
   inset: 0;
@@ -45,27 +63,29 @@ video {
   height: 100%;
   object-fit: cover;
 }
+
 .cinematic-shade {
-  position: absolute;
-  inset: 0;
+  z-index: 1;
   background:
-    linear-gradient(90deg, rgba(13, 8, 5, 0.8), rgba(13, 8, 5, 0.3) 55%, rgba(13, 8, 5, 0.52)),
-    linear-gradient(180deg, rgba(8, 5, 3, 0.34), transparent 40%, rgba(8, 5, 3, 0.72));
+    linear-gradient(90deg, rgba(13, 8, 5, 0.82), rgba(13, 8, 5, 0.32) 55%, rgba(13, 8, 5, 0.54)),
+    linear-gradient(180deg, rgba(8, 5, 3, 0.42), transparent 38%, rgba(8, 5, 3, 0.76));
 }
+
 .sunset-glow {
-  position: absolute;
-  inset: 0;
+  z-index: 2;
   background: radial-gradient(circle at 68% 43%, rgba(255, 145, 54, 0.42), transparent 35%);
-  opacity: 0.1;
+  opacity: 0.13;
 }
+
 .foreground-layer {
-  position: absolute;
-  inset: -2%;
-  background: radial-gradient(ellipse at center, transparent 47%, rgba(9, 5, 3, 0.4) 100%), linear-gradient(180deg, transparent 66%, rgba(7, 4, 2, 0.52));
+  z-index: 3;
+  background:
+    radial-gradient(ellipse at center, transparent 47%, rgba(9, 5, 3, 0.46) 100%),
+    linear-gradient(180deg, transparent 66%, rgba(7, 4, 2, 0.56));
 }
 
 .site-header {
-  position: absolute;
+  position: fixed;
   inset: 0 0 auto;
   z-index: 30;
   padding: 1.25rem 2rem;
@@ -214,21 +234,21 @@ video {
   text-transform: uppercase;
 }
 
-.scene-stack { position: absolute; inset: 0; z-index: 10; }
+.scene-stack { position: relative; z-index: 10; }
 .scene {
-  position: absolute;
-  inset: 0;
+  position: relative;
   display: flex;
+  min-height: 100svh;
   padding: 7rem 9vw 5rem;
   will-change: transform, opacity;
 }
-.scene h1, .scene h2, .scene--final > p {
+.scene h1, .scene h2, .scene--final p {
   margin: 0;
   font-family: 'Manrope', sans-serif;
   font-weight: 400;
   letter-spacing: -0.055em;
 }
-.scene h1 span, .scene h2 span, .scene--final > p span { display: block; color: #efb778; font-style: normal; font-weight: 300; }
+.scene h1 span, .scene h2 span, .scene--final p span { display: block; color: #efb778; font-style: normal; font-weight: 300; }
 .scene h1 { max-width: 66rem; font-size: clamp(3.5rem, 7.6vw, 7.8rem); line-height: 0.91; }
 .scene h2 { font-size: clamp(3rem, 5.8vw, 6rem); line-height: 0.96; }
 .scene--hero {
@@ -432,7 +452,7 @@ video {
   white-space: nowrap;
 }
 
-.scene--dashboard, .scene--variants { flex-direction: column; justify-content: center; }
+.scene--dashboard, .scene--variants { flex-direction: column; justify-content: center; min-height: 110svh; }
 .scene--dashboard { isolation: isolate; }
 .scene-heading { position: relative; z-index: 2; margin-bottom: 1.25rem; }
 .scene-heading h2 { font-size: clamp(2.8rem, 5.2vw, 5.2rem); }
@@ -442,14 +462,14 @@ video {
   z-index: 2;
   overflow: hidden;
   border-radius: 1rem;
-  transform: translateY(34px);
+  transform: none;
   will-change: transform, opacity;
 }
 .platform-showcase {
   position: relative;
   z-index: 2;
   width: 100%;
-  transform: translateY(34px);
+  transform: none;
   will-change: transform, opacity;
 }
 .platform-upper { display: grid; grid-template-columns: minmax(14rem, 0.28fr) minmax(0, 0.72fr); align-items: stretch; gap: 1.25rem; }
@@ -624,7 +644,7 @@ video {
   flex-direction: column;
   border-radius: 0.85rem;
   padding: 1.2rem;
-  transform: translateY(34px);
+  transform: none;
   will-change: transform, opacity;
 }
 .package-card__topline { display: flex; align-items: center; justify-content: space-between; color: rgba(255, 243, 223, 0.42); font-family: 'DM Mono', monospace; font-size: 0.56rem; }
@@ -649,7 +669,7 @@ video {
 
 .scene--final { flex-direction: column; align-items: center; justify-content: center; text-align: center; }
 .scene--final .terminal-line { margin-inline: auto; }
-.scene--final > p { max-width: 72rem; font-size: clamp(3.4rem, 7.5vw, 7.5rem); line-height: 0.95; }
+.scene--final p { max-width: 72rem; font-size: clamp(3.4rem, 7.5vw, 7.5rem); line-height: 0.95; }
 .scene--final .story-button { margin-top: 2.5rem; }
 
 @keyframes cursorBlink {
@@ -721,7 +741,7 @@ video {
   .package-summary { display: none; }
   .dashboard-bottom > div { border-right: 0; }
   .command-history code:nth-of-type(3) { display: none; }
-  .platform-showcase { transform: translateY(34px) scale(0.96); transform-origin: center; }
+  .platform-showcase { transform: none; transform-origin: center; }
   .platform-workflow { display: none; }
   .dashboard-shell--platform { display: block; }
   .window-dots { display: none; }
@@ -731,18 +751,15 @@ video {
   .package-card p { font-size: 0.6rem; }
   .install-command { padding-top: 0.5rem; }
   .install-command code { font-size: 0.45rem; }
-  .scene--final > p { font-size: clamp(3rem, 14vw, 4.5rem); }
+  .scene--final p { font-size: clamp(3rem, 14vw, 4.5rem); }
 }
 
 /* LANDING SECTIONS - FAQ + Footer with cinematic video background */
 
 .landing-sections {
   position: relative;
-  z-index: 1;
-  background:
-    radial-gradient(ellipse at 50% 0%, rgba(239, 183, 120, 0.05), transparent 50%),
-    radial-gradient(ellipse at 80% 100%, rgba(239, 183, 120, 0.03), transparent 40%),
-    #0e0805;
+  z-index: 10;
+  background: linear-gradient(180deg, rgba(14, 8, 5, 0.12), rgba(14, 8, 5, 0.48));
 }
 
 /* Layout */
@@ -760,6 +777,9 @@ video {
 .landing-section {
   position: relative;
   z-index: 1;
+  display: flex;
+  min-height: 100svh;
+  align-items: center;
   padding: 7rem 0;
   border-top: 1px solid rgba(255, 235, 211, 0.06);
 }
@@ -796,9 +816,9 @@ video {
 }
 
 .faq-item {
-  border: 1px solid rgba(255, 235, 211, 0.1);
+  border: 1px solid rgba(255, 235, 211, 0.14);
   border-radius: 0.85rem;
-  background: rgba(20, 12, 7, 0.7);
+  background: rgba(20, 12, 7, 0.52);
   overflow: hidden;
   transition: border-color 300ms ease, background-color 300ms ease;
 }
@@ -806,7 +826,7 @@ video {
 .faq-item:hover,
 .faq-item[open] {
   border-color: rgba(239, 183, 120, 0.22);
-  background: rgba(24, 14, 8, 0.85);
+  background: rgba(24, 14, 8, 0.68);
 }
 
 .faq-item summary {
@@ -853,7 +873,8 @@ video {
 .site-footer {
   position: relative;
   z-index: 1;
-  padding: 4rem 0 0;
+  min-height: 72svh;
+  padding: 5rem 0 0;
   border-top: 1px solid rgba(255, 235, 211, 0.06);
 }
 
