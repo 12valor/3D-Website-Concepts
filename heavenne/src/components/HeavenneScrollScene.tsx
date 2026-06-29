@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ArrowDown, ArrowRight, ArrowUp, Compass, Flame, PenLine, Sparkles } from 'lucide-react';
@@ -99,12 +99,9 @@ export function HeavenneScrollScene() {
   const rootRef = useRef<HTMLElement | null>(null);
   const pinRef = useRef<HTMLDivElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const progressRef = useRef<HTMLDivElement | null>(null);
   const mvpRef = useRef<HTMLElement | null>(null);
-  const activeChapterRef = useRef(0);
   const scrollTriggerRef = useRef<ReturnType<typeof ScrollTrigger.create> | null>(null);
   const textTimelineRef = useRef<gsap.core.Timeline | null>(null);
-  const [activeChapter, setActiveChapter] = useState(0);
 
   useLayoutEffect(() => {
     const root = rootRef.current;
@@ -114,6 +111,10 @@ export function HeavenneScrollScene() {
 
     let context: gsap.Context | undefined;
     let initialized = false;
+    let targetTime = 0;
+    let smoothedTime = 0;
+    let lastSeekAt = 0;
+    let rafId = 0;
 
     video.pause();
 
@@ -121,32 +122,36 @@ export function HeavenneScrollScene() {
       video.pause();
     };
 
+    const seekVideo = (time: number) => {
+      if (typeof video.fastSeek === 'function') {
+        video.fastSeek(time);
+      } else {
+        video.currentTime = time;
+      }
+    };
+
+    const smoothSeek = () => {
+      const duration = video.duration;
+
+      if (Number.isFinite(duration) && duration > 0) {
+        smoothedTime += (targetTime - smoothedTime) * 0.16;
+
+        const now = performance.now();
+        if (Math.abs(video.currentTime - smoothedTime) > 0.08 && now - lastSeekAt > 48) {
+          seekVideo(smoothedTime);
+          lastSeekAt = now;
+        }
+      }
+
+      rafId = requestAnimationFrame(smoothSeek);
+    };
+
     const syncVideoToScroll = (progress: number) => {
       const duration = video.duration;
       if (!Number.isFinite(duration) || duration <= 0) return;
 
       const safeProgress = Math.min(0.995, Math.max(0, progress));
-      const nextTime = safeProgress * duration;
-
-      if (Math.abs(video.currentTime - nextTime) > 0.04) {
-        video.currentTime = nextTime;
-      }
-    };
-
-    const updateChapterProgress = (progress: number) => {
-      if (progressRef.current) {
-        progressRef.current.style.transform = `scaleY(${progress})`;
-      }
-
-      const nextChapter = Math.min(
-        chapters.length - 1,
-        Math.floor(progress * chapters.length),
-      );
-
-      if (nextChapter !== activeChapterRef.current) {
-        activeChapterRef.current = nextChapter;
-        setActiveChapter(nextChapter);
-      }
+      targetTime = safeProgress * duration;
     };
 
     const setupScrollVideo = () => {
@@ -160,6 +165,8 @@ export function HeavenneScrollScene() {
       initialized = true;
       video.pause();
       video.currentTime = 0;
+      targetTime = 0;
+      smoothedTime = 0;
 
       context = gsap.context(() => {
         const sceneTexts = gsap.utils.toArray<HTMLElement>('[data-chapter-scene]');
@@ -189,19 +196,19 @@ export function HeavenneScrollScene() {
         invalidateOnRefresh: true,
         onUpdate: (self: { progress: number }) => {
           textTimelineRef.current?.progress(self.progress);
-          updateChapterProgress(self.progress);
           syncVideoToScroll(self.progress);
-          video.pause();
         },
         onLeave: pauseScrollVideo,
         onLeaveBack: () => {
           video.currentTime = 0;
+          targetTime = 0;
+          smoothedTime = 0;
           pauseScrollVideo();
           textTimelineRef.current?.progress(0);
-          updateChapterProgress(0);
         },
       });
 
+      rafId = requestAnimationFrame(smoothSeek);
       ScrollTrigger.refresh();
     };
 
@@ -212,6 +219,7 @@ export function HeavenneScrollScene() {
     }
 
     return () => {
+      cancelAnimationFrame(rafId);
       video.pause();
       video.removeEventListener('loadedmetadata', setupScrollVideo);
       scrollTriggerRef.current?.kill();
@@ -243,9 +251,6 @@ export function HeavenneScrollScene() {
   const scrollToMvp = () => {
     mvpRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
-
-  const progressLabel = `${String(activeChapter + 1).padStart(2, '0')} / ${String(chapters.length).padStart(2, '0')}`;
-
   return (
     <>
       <section ref={rootRef} className="heavenne-story relative min-h-[650vh] overflow-hidden bg-[#090b10]">
@@ -268,34 +273,6 @@ export function HeavenneScrollScene() {
           <div className="heavenne-haze pointer-events-none absolute inset-0" />
           <div className="heavenne-vignette pointer-events-none absolute inset-0" />
           <div className="film-grain pointer-events-none absolute inset-0 opacity-[0.08]" />
-
-          <aside className="fixed right-6 top-1/2 z-40 hidden -translate-y-1/2 items-center gap-4 lg:flex">
-            <div className="relative h-44 w-px bg-white/20">
-              <div
-                ref={progressRef}
-                className="absolute inset-0 origin-top bg-[#d9f0ff]"
-                style={{ transform: 'scaleY(0)' }}
-              />
-              <div className="absolute inset-0 flex flex-col justify-between">
-                {chapters.map((chapter, index) => (
-                  <button
-                    key={chapter.title}
-                    type="button"
-                    onClick={() => scrollToChapter(index)}
-                    aria-label={`Go to ${chapter.title}`}
-                    className={`-ml-[3px] h-[7px] w-[7px] rounded-full border transition-all duration-500 ${
-                      index <= activeChapter
-                        ? 'scale-100 border-[#d9f0ff] bg-[#d9f0ff]'
-                        : 'scale-75 border-white/45 bg-[#0e121b]'
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
-            <span className="w-5 font-sans text-[9px] uppercase text-white/55 [writing-mode:vertical-rl]">
-              {progressLabel}
-            </span>
-          </aside>
 
           <main className="relative z-10 h-full">
             {chapters.map((chapter, index) => {
