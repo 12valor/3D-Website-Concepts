@@ -19,29 +19,31 @@ body { overflow-x: hidden; background: #160d08; }
 button { font: inherit; }
 code, pre { font-family: 'DM Mono', monospace; }
 
-.quiet-story { min-height: 100vh; background: #160d08; }
+video {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.video-pin {
+  transform: translateZ(0);
+}
+
+.scene-text,
+.scroll-card,
+.scroll-content {
+  will-change: transform, opacity;
+}
+
+.quiet-story { min-height: 600vh; background: #160d08; }
 .scrub-stage { position: relative; height: 100svh; overflow: hidden; background: #160d08; }
-.cinematic-media { position: absolute; inset: -3%; transform-origin: center; will-change: transform; }
+.cinematic-media { position: absolute; inset: 0; }
 .cinematic-video {
   position: absolute;
   inset: 0;
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  backface-visibility: hidden;
-  transform: translateZ(0);
-}
-.scrub-canvas {
-  z-index: 1;
-  image-rendering: auto;
-}
-.scrub-video-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
-  pointer-events: none;
-  overflow: hidden;
 }
 .cinematic-shade {
   position: absolute;
@@ -55,13 +57,11 @@ code, pre { font-family: 'DM Mono', monospace; }
   inset: 0;
   background: radial-gradient(circle at 68% 43%, rgba(255, 145, 54, 0.42), transparent 35%);
   opacity: 0.1;
-  will-change: opacity;
 }
 .foreground-layer {
   position: absolute;
   inset: -2%;
   background: radial-gradient(ellipse at center, transparent 47%, rgba(9, 5, 3, 0.4) 100%), linear-gradient(180deg, transparent 66%, rgba(7, 4, 2, 0.52));
-  will-change: transform;
 }
 
 .site-header {
@@ -534,18 +534,14 @@ code, pre { font-family: 'DM Mono', monospace; }
 .stat-card { min-width: 0; padding: 0.75rem; border: 1px solid rgba(255, 235, 211, 0.1); border-radius: 0.5rem; background: rgba(255, 255, 255, 0.025); }
 .stat-card span { display: flex; align-items: center; gap: 0.4rem; color: rgba(255, 243, 223, 0.48); font-family: 'DM Mono', monospace; font-size: 0.5rem; }
 .stat-card strong { display: block; overflow: hidden; margin-top: 0.45rem; color: #f5d6ad; font-family: 'DM Mono', monospace; font-size: 0.68rem; font-weight: 400; text-overflow: ellipsis; white-space: nowrap; }
-.frame-timeline { padding: 0.7rem 0.9rem 0.55rem; border-bottom: 1px solid rgba(255, 235, 211, 0.12); }
-.frame-timeline__header, .frame-times { display: flex; align-items: center; justify-content: space-between; color: rgba(255, 243, 223, 0.42); font-family: 'DM Mono', monospace; font-size: 0.48rem; letter-spacing: 0.08em; text-transform: uppercase; }
-.frame-timeline__header code { color: rgba(239, 183, 120, 0.65); font-size: 0.46rem; text-transform: none; }
-.frame-strip { position: relative; display: grid; grid-template-columns: repeat(12, 1fr); height: 3.2rem; margin: 0.55rem 0 0.35rem; overflow: hidden; border: 1px solid rgba(239, 183, 120, 0.2); background: #160d08; }
-.frame-strip > span {
-  border-right: 1px solid rgba(255, 235, 211, 0.12);
-  background:
-    linear-gradient(180deg, rgba(22, 13, 8, calc(var(--frame) * 0.018)), rgba(10, 6, 4, 0.25)),
-    url('/quiet-place.jpg') center / cover;
-}
-.frame-strip > i { position: absolute; top: 0; bottom: 0; left: 45%; width: 1px; background: #f6d3a5; box-shadow: 0 0 0 3px rgba(246, 211, 165, 0.08); }
-.frame-strip > i::before { position: absolute; top: -0.2rem; left: -0.2rem; width: 0.4rem; height: 0.4rem; border-radius: 50%; background: #f6d3a5; content: ''; }
+.video-timeline { padding: 0.7rem 0.9rem 0.55rem; border-bottom: 1px solid rgba(255, 235, 211, 0.12); }
+.video-timeline__header, .video-times { display: flex; align-items: center; justify-content: space-between; color: rgba(255, 243, 223, 0.42); font-family: 'DM Mono', monospace; font-size: 0.48rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.video-timeline__header code { color: rgba(239, 183, 120, 0.65); font-size: 0.46rem; text-transform: none; }
+.video-rail { position: relative; height: 3.2rem; margin: 0.55rem 0 0.35rem; overflow: hidden; border: 1px solid rgba(239, 183, 120, 0.2); background: linear-gradient(90deg, rgba(239, 183, 120, 0.08), rgba(255, 243, 223, 0.18), rgba(119, 81, 55, 0.1)); }
+.video-rail > span { position: absolute; inset: 0.85rem 0.8rem; border-top: 1px solid rgba(255, 235, 211, 0.2); border-bottom: 1px solid rgba(255, 235, 211, 0.08); }
+.video-rail > span::before { position: absolute; inset: 50% 0 auto; height: 1px; background: linear-gradient(90deg, rgba(239, 183, 120, 0.1), rgba(239, 183, 120, 0.78), rgba(239, 183, 120, 0.1)); content: ''; }
+.video-rail > i { position: absolute; top: 0; bottom: 0; left: 45%; width: 1px; background: #f6d3a5; box-shadow: 0 0 0 3px rgba(246, 211, 165, 0.08); }
+.video-rail > i::before { position: absolute; top: -0.2rem; left: -0.2rem; width: 0.4rem; height: 0.4rem; border-radius: 50%; background: #f6d3a5; content: ''; }
 .dashboard-bottom { display: grid; grid-template-columns: 1.45fr 0.6fr 0.85fr; min-height: 6.1rem; }
 .dashboard-bottom > div { padding: 0.75rem 0.9rem; border-right: 1px solid rgba(255, 235, 211, 0.12); }
 .dashboard-bottom > div:last-child { border-right: 0; }
@@ -617,9 +613,9 @@ code, pre { font-family: 'DM Mono', monospace; }
 .bind-graph span, .bind-graph i { position: absolute; width: 0.38rem; height: 0.38rem; border-radius: 50%; background: #efb778; }
 .bind-graph span { left: 24%; bottom: 25%; }
 .bind-graph i { right: 18%; top: 10%; }
-.scroll-film { position: absolute; right: 0.75rem; bottom: 0.75rem; left: 0.75rem; display: grid; grid-template-columns: repeat(4, 1fr); height: 2.6rem; border: 1px solid rgba(239, 183, 120, 0.25); }
-.scroll-film > span { border-right: 1px solid rgba(255, 235, 211, 0.12); background: url('/quiet-place.jpg') center / cover; }
-.scroll-film > i { position: absolute; top: 50%; left: 50%; display: grid; width: 2rem; height: 2rem; place-items: center; border: 1px solid #efb778; border-radius: 0.45rem; color: #efb778; background: #24130c; transform: translate(-50%, -50%); }
+.scroll-scrub-meter { position: absolute; right: 0.75rem; bottom: 0.75rem; left: 0.75rem; height: 2.6rem; border: 1px solid rgba(239, 183, 120, 0.25); background: linear-gradient(90deg, rgba(239, 183, 120, 0.05), rgba(239, 183, 120, 0.22), rgba(255, 243, 223, 0.08)); }
+.scroll-scrub-meter > span { position: absolute; inset: 50% 0.75rem auto; height: 1px; background: rgba(255, 235, 211, 0.26); }
+.scroll-scrub-meter > i { position: absolute; top: 50%; left: 50%; display: grid; width: 2rem; height: 2rem; place-items: center; border: 1px solid #efb778; border-radius: 0.45rem; color: #efb778; background: #24130c; transform: translate(-50%, -50%); }
 
 .variant-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.75rem; }
 .package-card {
@@ -719,8 +715,8 @@ code, pre { font-family: 'DM Mono', monospace; }
   .environment-card { display: none; }
   .dashboard-stats { grid-template-columns: 1fr 1fr; padding: 0.5rem; }
   .stat-card { padding: 0.55rem; }
-  .frame-timeline { padding: 0.55rem; }
-  .frame-strip { height: 2.4rem; }
+  .video-timeline { padding: 0.55rem; }
+  .video-rail { height: 2.4rem; }
   .dashboard-bottom { grid-template-columns: 1fr; min-height: 0; }
   .package-summary { display: none; }
   .dashboard-bottom > div { border-right: 0; }
@@ -738,9 +734,7 @@ code, pre { font-family: 'DM Mono', monospace; }
   .scene--final > p { font-size: clamp(3rem, 14vw, 4.5rem); }
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   LANDING SECTIONS — FAQ + Footer with cinematic video background
-   ═══════════════════════════════════════════════════════════════ */
+/* LANDING SECTIONS - FAQ + Footer with cinematic video background */
 
 .landing-sections {
   position: relative;
@@ -751,7 +745,7 @@ code, pre { font-family: 'DM Mono', monospace; }
     #0e0805;
 }
 
-/* ─── Layout ─── */
+/* Layout */
 
 .landing-container {
   width: min(72rem, calc(100vw - 4rem));
@@ -793,7 +787,7 @@ code, pre { font-family: 'DM Mono', monospace; }
   font-weight: 300;
 }
 
-/* ─── FAQ ─── */
+/* FAQ */
 
 .faq-list {
   display: flex;
@@ -854,7 +848,7 @@ code, pre { font-family: 'DM Mono', monospace; }
   line-height: 1.7;
 }
 
-/* ─── Footer ─── */
+/* Footer */
 
 .site-footer {
   position: relative;
@@ -1030,7 +1024,7 @@ code, pre { font-family: 'DM Mono', monospace; }
 
 .footer-bottom svg { color: #efb778; }
 
-/* ─── Landing Responsive ─── */
+/* Landing Responsive */
 
 @media (max-width: 900px) {
   .landing-section { padding: 5rem 0; }
@@ -1055,4 +1049,3 @@ code, pre { font-family: 'DM Mono', monospace; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
 }
-

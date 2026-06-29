@@ -21,7 +21,7 @@ const faqs = [
   },
   {
     question: 'How does scroll-synced video seeking work?',
-    answer: 'snoopy maps your scroll position to a specific frame in the video timeline. When you scroll, it seeks the video to the corresponding time. When you stop scrolling, the video pauses on the exact frame. There\'s no playback — every frame is deterministic.',
+    answer: 'snoopy maps your scroll position to the video timeline. When you scroll, it seeks the native video to the corresponding time. When you stop scrolling, the video holds on that exact moment. There is no normal autoplay during the pinned sequence.',
   },
   {
     question: 'Can I use my own video files?',

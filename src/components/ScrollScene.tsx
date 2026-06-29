@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Activity, ArrowUpRight, Check, Clock3, Copy, Download, FolderClosed, Github, Link2, MousePointer2, Package, Pause, Star, Terminal, Twitter } from 'lucide-react';
@@ -20,7 +20,7 @@ const dashboardStats = [
   { label: 'Mood', value: 'Calm', icon: Activity },
   { label: 'Noise', value: 'Low', icon: Pause },
   { label: 'Session', value: '02:48', icon: Clock3 },
-  { label: 'Frame', value: '04:35 / 10:00', icon: MousePointer2 },
+  { label: 'Timeline', value: '04:35 / 10:00', icon: MousePointer2 },
 ];
 
 const workflowSteps = [
@@ -41,7 +41,7 @@ const workflowSteps = [
   {
     number: '03',
     title: 'Scroll',
-    description: 'Move to seek. Stop to hold the exact frame.',
+    description: 'Move to seek. Stop to hold the exact moment.',
     command: 'pauseWhenIdle()',
     icon: MousePointer2,
   },
@@ -49,55 +49,66 @@ const workflowSteps = [
 
 export function ScrollScene() {
   const smoothScrollTo = useFramerSmoothScroll();
-  const rootRef = useRef<HTMLDivElement>(null);
-  const stageRef = useRef<HTMLElement>(null);
+  const rootRef = useRef<HTMLElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const mediaRef = useRef<HTMLDivElement>(null);
-  const foregroundRef = useRef<HTMLDivElement>(null);
-  const glowRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
   const counterRef = useRef<HTMLSpanElement>(null);
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
+  const scrollTriggerRef = useRef<ReturnType<typeof ScrollTrigger.create> | null>(null);
   const activeChapterRef = useRef(-1);
-  const [videoFailed, setVideoFailed] = useState(false);
   const [copiedCommand, setCopiedCommand] = useState<string | null>(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const root = rootRef.current;
     const stage = stageRef.current;
     const video = videoRef.current;
-    const canvas = canvasRef.current;
-    if (!root || !stage || !video || !canvas) return;
+    if (!root || !stage || !video) return;
 
-    const ctx = canvas.getContext('2d', { alpha: false });
-    if (!ctx) return;
-
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let context: gsap.Context | undefined;
     let initialized = false;
-    let disposed = false;
+    let targetTime = 0;
+    let smoothedTime = 0;
+    let rafId = 0;
 
-    // Keep canvas resolution matched to its display size
-    const syncCanvasSize = () => {
-      const rect = canvas.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const w = Math.round(rect.width * dpr);
-      const h = Math.round(rect.height * dpr);
-      if (canvas.width !== w || canvas.height !== h) {
-        canvas.width = w;
-        canvas.height = h;
+    video.load();
+    video.pause();
+
+    const updateUiProgress = (progress: number) => {
+      const active = Math.min(chapters.length - 1, Math.floor(progress * chapters.length));
+
+      if (active !== activeChapterRef.current) {
+        activeChapterRef.current = active;
+        root.querySelectorAll<HTMLButtonElement>('[data-nav-chapter]').forEach((button) => {
+          const isActive = Number(button.dataset.navChapter) === active;
+          button.classList.toggle('is-active', isActive);
+          if (isActive) button.setAttribute('aria-current', 'true');
+          else button.removeAttribute('aria-current');
+        });
+      }
+
+      if (progressRef.current) {
+        progressRef.current.style.transform = `scaleY(${progress})`;
+      }
+
+      if (counterRef.current) {
+        counterRef.current.textContent = `0${active + 1} / 05`;
       }
     };
 
-    const resizeObserver = new ResizeObserver(syncCanvasSize);
-    resizeObserver.observe(canvas);
-    syncCanvasSize();
+    const smoothSeek = () => {
+      if (!video.duration || !Number.isFinite(video.duration)) {
+        rafId = requestAnimationFrame(smoothSeek);
+        return;
+      }
 
-    const paintFrame = () => {
-      if (disposed) return;
-      syncCanvasSize();
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      smoothedTime += (targetTime - smoothedTime) * 0.12;
+
+      if (Math.abs(video.currentTime - smoothedTime) > 0.025) {
+        video.currentTime = smoothedTime;
+      }
+
+      rafId = requestAnimationFrame(smoothSeek);
     };
 
     const createScrubTimeline = () => {
@@ -111,41 +122,8 @@ export function ScrollScene() {
       initialized = true;
       video.pause();
       video.currentTime = 0;
-      paintFrame();
-
-      let targetTime = 0;
-      let seekingFrame = false;
-      const scrubClock = { time: 0 };
-
-      const seekNextFrame = () => {
-        if (disposed || seekingFrame) return;
-
-        const requestedTime = targetTime;
-        seekingFrame = true;
-
-        const commitFrame = () => {
-          if (disposed) return;
-          paintFrame();
-          seekingFrame = false;
-
-          if (Math.abs(targetTime - requestedTime) > 1 / 48) {
-            seekNextFrame();
-          }
-        };
-
-        if (Math.abs(video.currentTime - requestedTime) <= 0.001 && !video.seeking) {
-          commitFrame();
-          return;
-        }
-
-        video.addEventListener('seeked', commitFrame, { once: true });
-        video.currentTime = requestedTime;
-      };
-
-      const requestFrame = (time: number) => {
-        targetTime = Math.max(0, Math.min(video.duration - 0.04, time));
-        seekNextFrame();
-      };
+      targetTime = 0;
+      smoothedTime = 0;
 
       context = gsap.context(() => {
         const scenes = gsap.utils.toArray<HTMLElement>('[data-scene]');
@@ -154,53 +132,9 @@ export function ScrollScene() {
         gsap.set(scenes, { autoAlpha: 0, y: 48, pointerEvents: 'none' });
         gsap.set(scenes[0], { autoAlpha: 1, y: 0, pointerEvents: 'auto' });
         gsap.set(panels, { y: 34 });
-        gsap.set(mediaRef.current, { scale: 1 });
-        gsap.set(glowRef.current, { opacity: 0.1 });
 
-        const timeline = gsap.timeline({
-          defaults: { ease: 'none' },
-          scrollTrigger: {
-            trigger: stage,
-            start: 'top top',
-            end: '+=700%',
-            scrub: true,
-            pin: true,
-            anticipatePin: 1,
-            invalidateOnRefresh: true,
-            onUpdate: (self) => {
-              const active = Math.min(chapters.length - 1, Math.floor(self.progress * chapters.length));
-              if (active !== activeChapterRef.current) {
-                activeChapterRef.current = active;
-                root.querySelectorAll<HTMLButtonElement>('[data-nav-chapter]').forEach((button) => {
-                  const isActive = Number(button.dataset.navChapter) === active;
-                  button.classList.toggle('is-active', isActive);
-                  if (isActive) button.setAttribute('aria-current', 'true');
-                  else button.removeAttribute('aria-current');
-                });
-              }
-              if (progressRef.current) {
-                progressRef.current.style.transform = `scaleY(${self.progress})`;
-              }
-              if (counterRef.current) {
-                counterRef.current.textContent = `0${active + 1} / 05`;
-              }
-            },
-          },
-        });
-
+        const timeline = gsap.timeline({ paused: true, defaults: { ease: 'none' } });
         timelineRef.current = timeline;
-
-        // GSAP owns currentTime for the full pinned sequence. If seeking still
-        // stutters, re-encode the MP4 as H.264, 1080p or lower, 24–30fps, with
-        // frequent keyframes; long-GOP/high-resolution media seeks poorly.
-        timeline.to(scrubClock, {
-          time: Math.max(0, video.duration - 0.04),
-          duration: 10,
-          onUpdate: () => requestFrame(scrubClock.time),
-        }, 0);
-        timeline.to(mediaRef.current, { scale: 1.055, duration: 10 }, 0);
-        timeline.to(foregroundRef.current, { yPercent: -4, scale: 1.02, duration: 10 }, 0);
-        timeline.to(glowRef.current, { opacity: 0.5, duration: 10 }, 0);
 
         const transitions = [
           { out: 1.2, enter: 1.75 },
@@ -220,23 +154,49 @@ export function ScrollScene() {
         timeline.to('[data-variant-card]', { y: 0, duration: 0.9, stagger: 0.08 }, 5.6);
       }, root);
 
+      scrollTriggerRef.current = ScrollTrigger.create({
+        trigger: root,
+        start: 'top top',
+        end: 'bottom bottom',
+        scrub: true,
+        pin: stage,
+        anticipatePin: 1,
+        invalidateOnRefresh: true,
+        onRefresh: (self: { progress: number }) => {
+          targetTime = self.progress * video.duration;
+          timelineRef.current?.progress(self.progress);
+          updateUiProgress(self.progress);
+        },
+        onUpdate: (self: { progress: number }) => {
+          targetTime = self.progress * video.duration;
+          timelineRef.current?.progress(self.progress);
+          updateUiProgress(self.progress);
+        },
+      });
+
+      rafId = requestAnimationFrame(smoothSeek);
       ScrollTrigger.refresh();
     };
 
-    createScrubTimeline();
-    video.addEventListener('loadedmetadata', createScrubTimeline);
+    if (video.readyState >= 1) {
+      createScrubTimeline();
+    } else {
+      video.addEventListener('loadedmetadata', createScrubTimeline, { once: true });
+    }
 
     return () => {
-      disposed = true;
+      cancelAnimationFrame(rafId);
       video.removeEventListener('loadedmetadata', createScrubTimeline);
-      resizeObserver.disconnect();
+      scrollTriggerRef.current?.kill();
+      scrollTriggerRef.current = null;
+      timelineRef.current?.kill();
       timelineRef.current = null;
       context?.revert();
     };
   }, []);
 
   const scrollToChapter = (index: number) => {
-    const trigger = timelineRef.current?.scrollTrigger;
+    const trigger = scrollTriggerRef.current;
     if (!trigger) return;
     const target = trigger.start + (trigger.end - trigger.start) * chapterStops[index];
     smoothScrollTo(target);
@@ -249,32 +209,24 @@ export function ScrollScene() {
   };
 
   return (
-    <div ref={rootRef} className="quiet-story">
-      <section ref={stageRef} className="scrub-stage">
-        <div ref={mediaRef} className="cinematic-media" aria-hidden="true">
-          <img src="/quiet-place.jpg" alt="" className="cinematic-video" />
-          <canvas
-            ref={canvasRef}
-            className="cinematic-video scrub-canvas"
-          />
-          {!videoFailed ? (
-            <video
-              ref={videoRef}
-              className="scrub-video-hidden"
-              muted
-              playsInline
-              preload="auto"
-              onError={() => setVideoFailed(true)}
-              data-testid="scroll-video"
-            >
-              <source src="/watermark-scroll-optimized.mp4" type="video/mp4" />
-            </video>
-          ) : null}
+    <section ref={rootRef} className="quiet-story scroll-content">
+      <div ref={stageRef} className="scrub-stage video-pin">
+        <div className="cinematic-media" aria-hidden="true">
+          <video
+            ref={videoRef}
+            className="cinematic-video"
+            muted
+            playsInline
+            preload="auto"
+            poster="/poster.jpg"
+            data-testid="scroll-video"
+          >
+            <source src="/videos/scroll-video.mp4" type="video/mp4" />
+          </video>
         </div>
-
         <div className="cinematic-shade" aria-hidden="true" />
-        <div ref={glowRef} className="sunset-glow" aria-hidden="true" />
-        <div ref={foregroundRef} className="foreground-layer" aria-hidden="true" />
+        <div className="sunset-glow" aria-hidden="true" />
+        <div className="foreground-layer" aria-hidden="true" />
 
         <header className="site-header">
           <nav className="theme-navbar" aria-label="Primary navigation">
@@ -338,7 +290,7 @@ export function ScrollScene() {
                 The video only moves
                 <span>when you do.</span>
               </h2>
-              <p className="section-summary">A deterministic cinematic timeline: every gesture maps to a frame, and every pause stays perfectly still.</p>
+              <p className="section-summary">A deterministic cinematic timeline: every gesture maps to the video, and every pause stays perfectly still.</p>
             </div>
             <div data-panel className="code-window">
               <div className="code-window__bar">
@@ -348,7 +300,7 @@ export function ScrollScene() {
               <pre><code><i>import</i> scroll <i>from</i> <b>'snoopy'</b>{'\n\n'}<i>const</i> video = document.querySelector(<b>'video'</b>){'\n\n'}scroll.bind(video).{'\n'}{'  '}pauseWhenIdle()</code></pre>
               <div className="code-window__footer">
                 <Pause size={12} fill="currentColor" />
-                Paused on the exact frame
+                Paused on the exact moment
               </div>
             </div>
           </section>
@@ -388,7 +340,7 @@ export function ScrollScene() {
                       <div>
                         <small>Environment</small>
                         <strong>Sunset Hill</strong>
-                        <p>A calm place to think in frames.</p>
+                        <p>A calm place to think in motion.</p>
                       </div>
                     </div>
                     <div className="dashboard-stats">
@@ -400,13 +352,13 @@ export function ScrollScene() {
                       ))}
                     </div>
                   </div>
-                  <div className="frame-timeline">
-                    <div className="frame-timeline__header"><span>Frame timeline</span><code>paused on exact frame</code></div>
-                    <div className="frame-strip">
-                      {Array.from({ length: 12 }, (_, index) => <span key={index} style={{ '--frame': index } as CSSProperties} />)}
+                  <div className="video-timeline">
+                    <div className="video-timeline__header"><span>Video timeline</span><code>scroll scrub active</code></div>
+                    <div className="video-rail">
+                      <span />
                       <i />
                     </div>
-                    <div className="frame-times"><span>00:00</span><span>02:30</span><span>05:00</span><span>07:30</span><span>10:00</span></div>
+                    <div className="video-times"><span>00:00</span><span>02:30</span><span>05:00</span><span>07:30</span><span>10:00</span></div>
                   </div>
                   <div className="dashboard-bottom">
                     <div className="command-history">
@@ -422,8 +374,8 @@ export function ScrollScene() {
                     </div>
                     <div className="session-status">
                       <span><i />Active</span>
-                      <p>Video is paused. Frame updates with your scroll and stops exactly when you stop.</p>
-                      <code><Pause size={12} fill="currentColor" />paused on exact frame</code>
+                      <p>Video is paused. Scroll moves the timeline and holds exactly when you stop.</p>
+                      <code><Pause size={12} fill="currentColor" />paused on exact moment</code>
                     </div>
                   </div>
                 </div>
@@ -443,7 +395,7 @@ export function ScrollScene() {
                         <code>{command}</code>
                         {title === 'Install' ? <small>ready to create quiet moments.</small> : null}
                         {title === 'Bind' ? <div className="bind-graph"><span /><i /></div> : null}
-                        {title === 'Scroll' ? <div className="scroll-film"><span /><span /><span /><span /><i><Pause size={13} /></i></div> : null}
+                        {title === 'Scroll' ? <div className="scroll-scrub-meter"><span /><i><Pause size={13} /></i></div> : null}
                       </div>
                     </article>
                   ))}
@@ -495,7 +447,7 @@ export function ScrollScene() {
             </button>
           </section>
         </main>
-      </section>
-    </div>
+      </div>
+    </section>
   );
 }
